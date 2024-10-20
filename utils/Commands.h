@@ -1,0 +1,2 @@
+//Commands
+#define EXIT "exit"

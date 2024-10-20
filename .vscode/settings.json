@@ -59,6 +59,7 @@
   "C_Cpp.errorSquiggles": "disabled",
   "files.associations": {
     "utils.h": "c",
-    "stat.h": "c"
+    "stat.h": "c",
+    "commands.h": "c"
   }
 }

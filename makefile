@@ -1,10 +1,16 @@
-all: feed
+all: feed manager
 
-feed: feed.o
-	gcc -o feed feed.o
+feed: frontend/feed.o
+	gcc -o frontend/feed frontend/feed.o
 
-feed.o: feed.c
-	gcc -c feed.c
+frontend/feed.o: frontend/feed.c
+	gcc -c frontend/feed.c -o frontend/feed.o
+
+manager: backend/manager.o
+	gcc -o backend/manager backend/manager.o
+
+backend/manager.o: backend/manager.c
+	gcc -c backend/manager.c -o backend/manager.o
 
 clean:
-	rm -f *.o feed
+	rm -f frontend/*.o backend/*.o frontend/feed backend/manager

@@ -44,7 +44,7 @@ int main (int argc, char *argv[]){
         buffer[strlen(buffer)-1] = '\0';
 
         
-        if(processCommand(buffer) != 0){
+        if(processCommand(buffer) == 1){
             write(manager_fd, buffer, strlen(buffer) + 1);
             close(manager_fd);
 
@@ -71,68 +71,99 @@ int main (int argc, char *argv[]){
 }
 
 int processCommand (char *buffer){
-    int index;
+    int index = -1;
     int n_topics;
     char *command;
-    command = strtok(buffer,SPACE);
-
-    printf("%d",command);
+    command = strtok(buffer, SPACE);
 
     n_topics = countWords(buffer);
 
-    for(int i = 0; i < N_COMMANDS;i++){
-        if(strcmp(command,COMMANDS[i])==0){
+    for(int i = 0; i < N_COMMANDS; i++){
+        if(strcmp(command, COMMANDS[i]) == 0){
             index = i;
+            break;
         }
+    }
+
+    if (index == -1) {
+        printf(INVALID_COMMANDS);
+        return 0;
     }
 
     switch (index)
     {
-        case 0: //TOPICS
+        case 0: // TOPICS
             if(n_topics == 1){
-
+                return 1;
             }else{
-
+                printf(SYNTAX_ERROR_TOPICS);
+                return 0;
             }
-            break;
-        case 1: //MSG
+        case 1: // MSG
             if(n_topics >= 4){
+                char *topic = strtok(NULL, SPACE);
+                char *duration = strtok(NULL, SPACE);
+                char *message = strtok(NULL, "");
 
+                if (strlen(topic) > 20) {
+                    printf(TOPIC_LENGTH_ERROR);
+                    return 0;
+                }
+
+                if (strlen(message) > 300) {
+                    printf(MESSAGE_LENGTH_ERROR);
+                    return 0;
+                }
+
+                return 1;
             }else{
-
+                printf(SYNTAX_ERROR_MSG);
+                return 0;
             }
-            break;
-        case 2: //SUBCRIBE
+        case 2: // SUBSCRIBE
             if(n_topics == 2){
+                char *topic = strtok(NULL, SPACE);
 
+                if (strlen(topic) > 20) {
+                    printf(TOPIC_LENGTH_ERROR);
+                    return 0;
+                }
+
+                return 1;
             }else{
-
+                printf(SYNTAX_ERROR_SUBCRIBE);
+                return 0;
             }
-            break;
-        case 3: //UNSUBCRIBE
+        case 3: // UNSUBSCRIBE
             if(n_topics == 2){
+                char *topic = strtok(NULL, SPACE);
 
+                if (strlen(topic) > 20) {
+                    printf(TOPIC_LENGTH_ERROR);
+                    return 0;
+                }
+
+                return 1;
             }else{
-
+                printf(SYNTAX_ERROR_UNSUBCRIBE);
+                return 0;
             }
-            break;
-        case 4: //HELP
+        case 4: // HELP
             if(n_topics == 1){
-
+                return 1;
             }else{
-
+                printf(SYNTAX_ERROR_HELP);
+                return 0;
             }
-            break;
         default:
-            break;
+            return 0;
     }
-    return 0;
 }
 
 int countWords(char *buffer){
     int spaces = 0;
 
-    for(int i = 0;buffer[i] != '\0';i++){
+    for(int i = 0; buffer[i] != '\0'; i++){
         if(buffer[i] == ' '){
             spaces++;
         }

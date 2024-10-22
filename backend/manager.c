@@ -12,17 +12,32 @@
 #include "../utils/Globals.h"
 #include "../backend/models/user.h"
 
-void showTopics(Topic topic[20]) {
-    for (int i = 0; i < 20; i++) {
-        if (strlen(topic[i].nome) > 0) { 
-            printf("Topic %d: %s\n", i + 1, topic[i].nome);
-        }
+void showTopics(Topic topic[20],int n_topicos) {
+    for (int i = 0; i < n_topicos; i++) {
+        printf("Topic: %s\n",topic[i].nome);
+        //printf("Numero de mensagens: %d\n",);//adicionar variavel para receber o numero de mensagens
     }
+}
+
+void sendMsg(char *buffer){
+    int feed_fd;
+    
+    feed_fd = open(FEED_PIPE,O_WRONLY);
+    if (feed_fd == -1) {
+        perror("Erro ao abrir FEED_PIPE");
+        exit(EXIT_FAILURE);
+    }
+
+    strcpy(buffer,"...");
+         
+    write(feed_fd,buffer,strlen(buffer)+1);
+    close(feed_fd);
 }
 
 int main(int argc, char *argv[]) {
     int manager_fd,feed_fd;
     int index;
+    int n_users = 0,n_topics = 0;
     char buffer[MAX_MSG_SIZE];
     char *command;
     User user[10];
@@ -63,13 +78,11 @@ int main(int argc, char *argv[]) {
         switch (index)
         {
             case 0: // TOPICS
-                if(strlen(topic[0].nome) == 0){
-                    printf("Entrou \n");
-                    showTopics(topic);
+                if(n_topics > 0){
+                    showTopics(topic,n_topics);
                 }else{
-                    printf("Nao exitem topicos\n");
+                    sendMsg("Ainda nao existem topicos\n");
                 }
-            
                 break;
             case 1: // MSG
                 

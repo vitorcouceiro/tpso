@@ -1,7 +1,7 @@
 #define ERRO_HEADER "[ERRO]"
 #define INFO_HEADER "[INFO]"
 //Info
-
+#define EMPTY_COMMAND INFO_HEADER " Comando vazio.\n"
 //Error
 #define INVALID_ARGS_FEED ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./feed <nome>\n" 
 #define INVALID_ARGS_MANA ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./manager\n" 
@@ -14,3 +14,5 @@
 #define TOPIC_LENGTH_ERROR ERRO_HEADER " O topico nao pode ter mais de 20 caracteres.\n"
 #define MESSAGE_LENGTH_ERROR ERRO_HEADER " A mensagem nao pode ter mais de 300 caracteres.\n"
 #define INVALID_COMMAND ERRO_HEADER " Comando invalido.\n"
+#define ERROR_READING_COMMAND ERRO_HEADER " Erro ao ler o comando.\n"
+

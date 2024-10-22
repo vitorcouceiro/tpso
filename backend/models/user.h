@@ -1,8 +1,9 @@
 #ifndef USER_H
 #define USER_H
 
-typedef struct {
+typedef struct 
+{
     char nome[10];
-} user;
+} User;
 
 #endif // USER_H

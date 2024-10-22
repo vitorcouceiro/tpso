@@ -60,6 +60,8 @@
   "files.associations": {
     "utils.h": "c",
     "stat.h": "c",
-    "commands.h": "c"
+    "commands.h": "c",
+    "topic.h": "c",
+    "manager.h": "c"
   }
 }

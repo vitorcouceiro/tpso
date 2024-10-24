@@ -62,6 +62,8 @@
     "stat.h": "c",
     "commands.h": "c",
     "topic.h": "c",
-    "manager.h": "c"
+    "manager.h": "c",
+    "globals.h": "c",
+    "exceptions.h": "c"
   }
 }

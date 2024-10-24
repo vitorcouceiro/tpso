@@ -4,5 +4,4 @@
 
 void showTopics(Topic topic[20],int n_topicos);
 void sendMsg(char *buffer);
-
 #endif

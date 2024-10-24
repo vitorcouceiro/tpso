@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -12,10 +13,19 @@
 #include "../utils/Globals.h"
 #include "../backend/models/user.h"
 
-void showTopics(Topic topic[20],int n_topicos) {
-    for (int i = 0; i < n_topicos; i++) {
-        printf("Topic: %s\n",topic[i].nome);
-        //printf("Numero de mensagens: %d\n",);//adicionar variavel para receber o numero de mensagens
+void cleanup(int signo){
+    unlink(MANAGER_PIPE);
+    exit(EXIT_FAILURE);
+}
+
+void showTopics(Topic topic[20],int n_topics) {
+    if(n_topics > 0){
+        for (int i = 0; i < n_topics; i++) {
+            printf("Topic: %s\n",topic[i].nome);
+            //printf("Numero de mensagens: %d\n",);//adicionar variavel para receber o numero de mensagens
+        }
+    }else{
+        sendMsg("Ainda nao existem topicos\n");
     }
 }
 
@@ -27,8 +37,6 @@ void sendMsg(char *buffer){
         perror("Erro ao abrir FEED_PIPE");
         exit(EXIT_FAILURE);
     }
-
-    strcpy(buffer,"...");
          
     write(feed_fd,buffer,strlen(buffer)+1);
     close(feed_fd);
@@ -37,20 +45,27 @@ void sendMsg(char *buffer){
 int main(int argc, char *argv[]) {
     int manager_fd,feed_fd;
     int index;
-    int n_users = 0,n_topics = 0;
+    int n_users = 0, n_topics = 0;
     char buffer[MAX_MSG_SIZE];
     char *command;
     User user[10];
     Topic topic[20];
     
     
+    signal(SIGINT,cleanup);
 
     if(argc != 1){
         printf(INVALID_ARGS_MANA);
         exit(EXIT_FAILURE);
     }
 
+    if(access(MANAGER_PIPE,F_OK) == 0){
+        printf(MANAGER_ALREADY_RUNNING);
+        exit(EXIT_FAILURE);
+    }
+
     mkfifo(MANAGER_PIPE,0660);
+    
 
     while(1){
         manager_fd = open(MANAGER_PIPE,O_RDONLY);
@@ -78,18 +93,17 @@ int main(int argc, char *argv[]) {
         switch (index)
         {
             case 0: // TOPICS
-                if(n_topics > 0){
-                    showTopics(topic,n_topics);
-                }else{
-                    sendMsg("Ainda nao existem topicos\n");
-                }
+                showTopics(topic,n_topics);
                 break;
             case 1: // MSG
-                
+                //writeMsg();
+                break;
             case 2: // SUBSCRIBE
-
+                //subcribeTopics();
+                break;
             case 3: // UNSUBSCRIBE
-
+                //unsubcribeTopics();
+                break;
             case 4: // HELP
                 //helpUser();
             default:
@@ -115,6 +129,7 @@ int main(int argc, char *argv[]) {
         close(feed_fd);
     }
 
+    unlink(MANAGER_PIPE);
     return 0;
 }
 

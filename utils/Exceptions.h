@@ -15,4 +15,5 @@
 #define MESSAGE_LENGTH_ERROR ERRO_HEADER " A mensagem nao pode ter mais de 300 caracteres.\n"
 #define INVALID_COMMAND ERRO_HEADER " Comando invalido.\n"
 #define ERROR_READING_COMMAND ERRO_HEADER " Erro ao ler o comando.\n"
-
+#define MANAGER_ALREADY_RUNNING ERRO_HEADER " Ja existe um manager em funcionamento.\n"
+#define MANAGER_NOT_RUNNING ERRO_HEADER "Nao existe um manager em funcionamento. \n"

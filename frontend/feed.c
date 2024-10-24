@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -9,6 +10,11 @@
 #include "../utils/Commands.h"
 #include "../utils/Exceptions.h"
 #include "../utils/Globals.h"
+
+void cleanup(int signo){
+    unlink(FEED_PIPE);
+    exit(EXIT_FAILURE);
+}
 
 int processCommand (char *buffer){
     int index = -1;
@@ -129,21 +135,23 @@ int main (int argc, char *argv[]){
     int feed_fd,manager_fd;
     char buffer[MAX_MSG_SIZE];
 
+    signal(SIGINT,cleanup);
+
     if(argc != 2){
         printf(INVALID_ARGS_FEED);
+        exit(EXIT_FAILURE);
+    }
+
+    if(access(MANAGER_PIPE,F_OK) != 0){
+        printf(MANAGER_NOT_RUNNING);
         exit(EXIT_FAILURE);
     }
 
     mkfifo(FEED_PIPE,0660);
 
     // argv[1] -> nome do user
-
-    /*if(CONNECT_USER <= MAX_USERS){
-        sendMsg(argv[1]);
-    }else{
-        printf(MAX_USERS_REACHED);
-        exit(EXIT_FAILURE);
-    }*/
+    //sendMsg(argv[1]);
+    
 
     do{
         printf("cmd > ");

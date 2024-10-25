@@ -5,11 +5,24 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <pthread.h>
 #include <fcntl.h>
 #include "feed.h"
+#include "../backend/models/comunicacao.h"
 #include "../utils/Commands.h"
 #include "../utils/Exceptions.h"
 #include "../utils/Globals.h"
+
+void *monitorServer(void *arg){
+    while(1){
+        if(access(MANAGER_PIPE,F_OK) != 0){
+            printf(ERROR_OPENING_MANAGER_PIPE);
+            unlink(FEED_PIPE);
+            exit(EXIT_FAILURE);
+        }
+    }
+    return NULL;
+}
 
 void cleanup(int signo){
     unlink(FEED_PIPE);
@@ -24,8 +37,8 @@ int processCommand (char *buffer){
 
     n_topics = countWords(buffer);
 
-    for(int i = 0; i < N_COMMANDS; i++){
-        if(strcmp(command, COMMANDS[i]) == 0){
+    for(int i = 0; i < N_COMMANDS_USER; i++){
+        if(strcmp(command, COMMANDS_USER[i]) == 0){
             index = i;
             break;
         }
@@ -119,21 +132,23 @@ int countWords(char *buffer){
 }
 
 void sendMsg(char *message){
-        int manager_fd;
-        manager_fd = open(MANAGER_PIPE,O_WRONLY);
+    int manager_fd;
+    manager_fd = open(MANAGER_PIPE,O_WRONLY);
 
-        if (manager_fd == -1) {
-            perror("Erro ao abrir MANAGER_PIPE");
-            exit(EXIT_FAILURE);
-        }
+    if (manager_fd == -1) {
+        perror(ERROR_OPENING_MANAGER_PIPE);
+        exit(EXIT_FAILURE);
+    }
 
-        write(manager_fd, message, strlen(message) + 1);
-        close(manager_fd);
+    write(manager_fd, message, strlen(message) + 1);
+    close(manager_fd);
 }
 
 int main (int argc, char *argv[]){
     int feed_fd,manager_fd;
     char buffer[MAX_MSG_SIZE];
+    pthread_t monitor_thread;
+    Comunicacao comunicacao;
 
     signal(SIGINT,cleanup);
 
@@ -150,10 +165,17 @@ int main (int argc, char *argv[]){
     mkfifo(FEED_PIPE,0660);
 
     // argv[1] -> nome do user
-    //sendMsg(argv[1]);
+    // sendMsg(argv[1]);
+
     
+    if(pthread_create(&monitor_thread,NULL,monitorServer,NULL)!= 0){
+        perror(ERROR_CREATING_MONITOR_THREAD);
+        unlink(FEED_PIPE);
+        exit(EXIT_FAILURE);
+    }
 
     do{
+
         printf("cmd > ");
 
         if (fgets(buffer, MAX_MSG_SIZE, stdin) == NULL) {
@@ -180,6 +202,7 @@ int main (int argc, char *argv[]){
             feed_fd = open(FEED_PIPE, O_RDONLY);
             if (feed_fd == -1) {
                 perror("Erro ao abrir FEED_PIPE");
+                unlink(FEED_PIPE);
                 exit(EXIT_FAILURE);
             }
 

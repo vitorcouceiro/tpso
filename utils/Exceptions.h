@@ -16,4 +16,6 @@
 #define INVALID_COMMAND ERRO_HEADER " Comando invalido.\n"
 #define ERROR_READING_COMMAND ERRO_HEADER " Erro ao ler o comando.\n"
 #define MANAGER_ALREADY_RUNNING ERRO_HEADER " Ja existe um manager em funcionamento.\n"
-#define MANAGER_NOT_RUNNING ERRO_HEADER "Nao existe um manager em funcionamento. \n"
+#define MANAGER_NOT_RUNNING ERRO_HEADER " Nao existe um manager em funcionamento. \n"
+#define ERROR_CREATING_MONITOR_THREAD ERRO_HEADER " Erro ao criar thread de monitoramento.\n"
+#define ERROR_OPENING_MANAGER_PIPE ERRO_HEADER " Erro ao abrir MANAGER_PIPE.\n"

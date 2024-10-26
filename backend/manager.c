@@ -13,10 +13,40 @@
 #include "../utils/Exceptions.h"
 #include "../utils/Globals.h"
 #include "../backend/models/user.h"
+#include "../backend/models/comunicacao.h"
 
 void cleanup(int signo){
     unlink(MANAGER_PIPE);
     exit(EXIT_FAILURE);
+}
+
+void sendMsg(Comunicacao comunicacao){
+    int feed_fd;
+    feed_fd = open(comunicacao.FEED_PIPE,O_WRONLY);
+
+    if (feed_fd == -1) {
+        perror("Erro ao abrir FEED_PIPE");
+        exit(EXIT_FAILURE);
+    }
+
+    write(feed_fd, &comunicacao, sizeof(Comunicacao));
+    close(feed_fd);
+}
+
+Comunicacao receiveMsg(){
+    int manager_fd;
+    Comunicacao comunicacao;
+    
+    manager_fd = open(MANAGER_PIPE, O_RDONLY);
+    if (manager_fd == -1) {
+        perror("Erro ao abrir MANAGER_PIPE");
+        exit(EXIT_FAILURE);
+    }
+
+    read(manager_fd, &comunicacao, sizeof(Comunicacao));
+    close(manager_fd);
+
+    return comunicacao;
 }
 
 int countWords(char *buffer){
@@ -31,37 +61,19 @@ int countWords(char *buffer){
     return spaces + 1;
 }
 
-void showTopics(Topic topic[20],int n_topics) {
-    if(n_topics > 0){
-        for (int i = 0; i < n_topics; i++) {
-            printf("Topic: %s\n",topic[i].nome);
-            //printf("Numero de mensagens: %d\n",);//adicionar variavel para receber o numero de mensagens
-        }
-    }else{
-        sendMsg("Ainda nao existem topicos\n");
-    }
+void showTopics(Comunicacao comunicacao) {
+    printf("entrou");
+    strcpy(comunicacao.buffer,"ola");
+    sendMsg(comunicacao);
 }
 
-void sendMsg(char *buffer){
-    int feed_fd;
-    
-    feed_fd = open(FEED_PIPE,O_WRONLY);
-    if (feed_fd == -1) {
-        perror("Erro ao abrir FEED_PIPE");
-        exit(EXIT_FAILURE);
-    }
-         
-    write(feed_fd,buffer,strlen(buffer)+1);
-    close(feed_fd);
-}
 
 void processCommandAdm(char *buffer){
     int index = -1;
-    int n_topics;
     char *command;
     command = strtok(buffer,SPACE);
 
-    n_topics = countWords(buffer);
+    int n_topics = countWords(buffer);
 
     for(int i = 0; i < N_COMMANDS_ADM; i++){
         if(strcmp(command,COMMANDS_ADM[i]) == 0){
@@ -88,38 +100,36 @@ void processCommandAdm(char *buffer){
     }
 }
 
-void *process_orders(void *ptdata){
+void *process_orders(void *ptdata) {
     int manager_fd, feed_fd;
     int index;
-    char buffer[MAX_MSG_SIZE];
     char *command;
     TDATA *td = (TDATA *)ptdata;
+    Comunicacao comunicacao;
 
-    while(1){
-        manager_fd = open(MANAGER_PIPE, O_RDONLY);
-        if (manager_fd == -1) {
-            perror("Erro ao abrir MANAGER_PIPE");
-            exit(EXIT_FAILURE);
+    while (1) {
+        comunicacao = receiveMsg();
+
+        if(strcmp(comunicacao.tipoPedido,"login") == 0){
+            strcpy(comunicacao.buffer, "login_success");
+            strcpy(comunicacao.tipoPedido, "linha_commands");
+            sendMsg(comunicacao);
         }
 
-        read(manager_fd, buffer, MAX_MSG_SIZE);
-        close(manager_fd);
+        comunicacao = receiveMsg();
 
-        command = strtok(buffer, SPACE);
+        command = strtok(comunicacao.buffer, SPACE);
 
-        printf("Mensagem: %s\n", buffer);
-
-        for(int i = 0; i < N_COMMANDS_USER; i++){
-            if(strcmp(command, COMMANDS_USER[i]) == 0){
+        for (int i = 0; i < N_COMMANDS_USER; i++) {
+            if (strcmp(command, COMMANDS_USER[i]) == 0) {
                 index = i;
                 break;
             }
         }
 
-        switch (index)
-        {
+        switch (index) {
             case 0: // TOPICS
-                showTopics(td->topics, td->n_topics);
+                showTopics(comunicacao);
                 break;
             case 1: // MSG
                 //writeMsg();
@@ -134,29 +144,30 @@ void *process_orders(void *ptdata){
                 //helpUser();
                 break;
             default:
-                sendMsg("Comando inválido\n");
+                //sendMsg("Comando inválido\n");
                 continue;
         }
 
-        if(strcmp(buffer, EXIT) == 0){
+        if (strcmp(comunicacao.buffer, EXIT) == 0) {
             printf("A terminar o manager\n");
             break;
         }
 
-        feed_fd = open(FEED_PIPE, O_WRONLY);
+        feed_fd = open(comunicacao.FEED_PIPE, O_WRONLY);
         if (feed_fd == -1) {
             perror("Erro ao abrir FEED_PIPE");
             exit(EXIT_FAILURE);
         }
 
-        strcpy(buffer, "...");
+        strcpy(comunicacao.buffer, "...");
 
-        write(feed_fd, buffer, strlen(buffer) + 1);
+        write(feed_fd, comunicacao.buffer, strlen(comunicacao.buffer) + 1);
         close(feed_fd);
     }
 
     return NULL;
 }
+
 
 int main(int argc, char *argv[]) {
     pthread_t thread;
@@ -164,8 +175,7 @@ int main(int argc, char *argv[]) {
     char *command;
 
     TDATA td;
-    
-    
+
     signal(SIGINT,cleanup);
 
     if(argc != 1){
@@ -180,7 +190,6 @@ int main(int argc, char *argv[]) {
 
     mkfifo(MANAGER_PIPE,0660);
     
-    //thread para processar pedidos
     if(access(MANAGER_PIPE,F_OK) != 0){
         printf(MANAGER_NOT_RUNNING);
         exit(EXIT_FAILURE);

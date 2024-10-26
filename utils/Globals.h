@@ -13,5 +13,4 @@ char *COMMANDS_ADM[]={USERS,REMOVE,TOPICS,SHOW,LOCK,UNLOCK};
 int CONNECTED_USERS = 0;
 
 //Const pipes
-#define FEED_PIPE "../tmp/feed_pipe"
 #define MANAGER_PIPE "../tmp/manager_pipe"

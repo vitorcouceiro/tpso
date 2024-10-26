@@ -4,6 +4,7 @@
 typedef struct 
 {
     char nome[10];
+    int pid;
 } User;
 
 #endif // USER_H

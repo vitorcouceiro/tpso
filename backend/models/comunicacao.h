@@ -9,7 +9,10 @@ typedef struct Comunicacao {
     User user;
     Topic topic;
     Msg msg;
-
-}Comunicacao;
+    char FEED_PIPE[256]; 
+    char buffer[300];
+    char command[20];
+    char tipoPedido[40];
+} Comunicacao;
 
 #endif // COMUNICACAO_H

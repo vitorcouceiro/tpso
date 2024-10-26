@@ -64,6 +64,9 @@
     "topic.h": "c",
     "manager.h": "c",
     "globals.h": "c",
-    "exceptions.h": "c"
+    "exceptions.h": "c",
+    "unistd.h": "c",
+    "types.h": "c",
+    "pthread.h": "c"
   }
 }

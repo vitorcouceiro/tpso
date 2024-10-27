@@ -7,9 +7,11 @@
 
 typedef struct Comunicacao {
     User user;
-    Topic topic;
-    Msg msg;
-
-}Comunicacao;
+    Topic topic[20];
+    int n_topics;
+    char buffer[300];
+    char command[20];
+    char tipoPedido[40];
+} Comunicacao;
 
 #endif // COMUNICACAO_H

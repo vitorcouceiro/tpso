@@ -6,6 +6,8 @@
 typedef struct
 {
     char nome[20];
+    int n_persistentes;
+    char estado[20];
     Msg persistente[5];
     Msg n_persiste;
 } Topic;

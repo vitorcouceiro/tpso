@@ -13,20 +13,29 @@
 #include "../utils/Exceptions.h"
 #include "../utils/Globals.h"
 
+int countWords(char *buffer){
+    int spaces = 0;
+
+    for(int i = 0; buffer[i] != '\0'; i++){
+        if(buffer[i] == ' '){
+            spaces++;
+        }
+    }
+    
+    return spaces + 1;
+}
+
 void *monitorServer(void *arg){
+    char *FEED_PIPE = (char *)arg;
     while(1){
         if(access(MANAGER_PIPE,F_OK) != 0){
             printf(ERROR_OPENING_MANAGER_PIPE);
             unlink(FEED_PIPE);
             exit(EXIT_FAILURE);
         }
+        sleep(1);
     }
     return NULL;
-}
-
-void cleanup(int signo){
-    unlink(FEED_PIPE);
-    exit(EXIT_FAILURE);
 }
 
 int processCommand (char *buffer){
@@ -119,38 +128,69 @@ int processCommand (char *buffer){
     }
 }
 
-int countWords(char *buffer){
-    int spaces = 0;
-
-    for(int i = 0; buffer[i] != '\0'; i++){
-        if(buffer[i] == ' '){
-            spaces++;
-        }
-    }
+void sendMsg(Comunicacao comunicacao){
     
-    return spaces + 1;
-}
-
-void sendMsg(char *message){
     int manager_fd;
+    
     manager_fd = open(MANAGER_PIPE,O_WRONLY);
-
     if (manager_fd == -1) {
         perror(ERROR_OPENING_MANAGER_PIPE);
         exit(EXIT_FAILURE);
     }
 
-    write(manager_fd, message, strlen(message) + 1);
+    write(manager_fd, &comunicacao, sizeof(Comunicacao));
     close(manager_fd);
+}
+
+Comunicacao receiveMsg(char *FEED_PIPE){
+    int feed_fd;
+    Comunicacao comunicacao;
+    
+    feed_fd = open(FEED_PIPE, O_RDONLY);
+    if (feed_fd == -1) {
+        perror(ERROR_OPENING_FEED_PIPE);
+        unlink(FEED_PIPE);
+        exit(EXIT_FAILURE);
+    }
+
+    read(feed_fd, &comunicacao, sizeof(Comunicacao));
+    close(feed_fd);
+
+    return comunicacao;
+}
+
+
+void *handleManagerResponse(void *arg) {
+    char *FEED_PIPE = (char *)arg;
+    Comunicacao comunicacao;
+
+    while (1) {
+        comunicacao = receiveMsg(FEED_PIPE);
+        if (strcmp(comunicacao.command, TOPICS) == 0) {
+            if (comunicacao.n_topics == 0) {
+                printf(NO_TOPICS);
+            } else {
+                for (int i = 0; i < comunicacao.n_topics; i++) {
+                    printf("Topic: %s\n", comunicacao.topic[i].nome);
+                    printf("Numero de mensagens persistentes: %d\n", comunicacao.topic[i].n_persistentes);
+                    printf("Estado: %s\n", comunicacao.topic[i].estado);
+                    printf("\n");
+                }
+            }
+        } else if(strcmp(comunicacao.command, EXIT) == 0){
+            
+        }
+    }
+    return NULL;
 }
 
 int main (int argc, char *argv[]){
     int feed_fd,manager_fd;
     char buffer[MAX_MSG_SIZE];
-    pthread_t monitor_thread;
+    pthread_t monitor_thread, response_thread;
     Comunicacao comunicacao;
-
-    signal(SIGINT,cleanup);
+    pid_t pid = getpid();
+    char FEED_PIPE[256];
 
     if(argc != 2){
         printf(INVALID_ARGS_FEED);
@@ -162,20 +202,38 @@ int main (int argc, char *argv[]){
         exit(EXIT_FAILURE);
     }
 
+    snprintf(FEED_PIPE, sizeof(FEED_PIPE), "../tmp/pipe_%d", pid);
     mkfifo(FEED_PIPE,0660);
 
-    // argv[1] -> nome do user
-    // sendMsg(argv[1]);
+    strcpy(comunicacao.user.FEED_PIPE,FEED_PIPE);
 
-    
-    if(pthread_create(&monitor_thread,NULL,monitorServer,NULL)!= 0){
+    if(pthread_create(&monitor_thread, NULL, monitorServer, (void *)FEED_PIPE) != 0){
         perror(ERROR_CREATING_MONITOR_THREAD);
         unlink(FEED_PIPE);
         exit(EXIT_FAILURE);
     }
 
-    do{
+    if(pthread_create(&response_thread, NULL, handleManagerResponse, (void *)FEED_PIPE) != 0){
+        perror(ERROR_CREATING_RESPONSE_THREAD);
+        unlink(FEED_PIPE);
+        exit(EXIT_FAILURE);
+    }
 
+    strcpy(comunicacao.user.nome,argv[1]);
+    strcpy(comunicacao.tipoPedido,"login");
+    
+    sendMsg(comunicacao);
+    comunicacao = receiveMsg(FEED_PIPE);
+
+    if (strcmp(comunicacao.buffer,LOGIN_SUCCESS) != 0) { 
+        printf(comunicacao.buffer);
+        close(feed_fd);
+        unlink(FEED_PIPE);
+        exit(EXIT_FAILURE);
+    }
+    printf(comunicacao.buffer);
+
+    do{
         printf("cmd > ");
 
         if (fgets(buffer, MAX_MSG_SIZE, stdin) == NULL) {
@@ -190,31 +248,17 @@ int main (int argc, char *argv[]){
 
         buffer[strlen(buffer) - 1] = '\0';
 
-        
-        if(processCommand(buffer) == 1){
-            
-            sendMsg(buffer);
-
-            if (strcmp(buffer, EXIT) == 0) {
-                break;
-            }
-
-            feed_fd = open(FEED_PIPE, O_RDONLY);
-            if (feed_fd == -1) {
-                perror("Erro ao abrir FEED_PIPE");
-                unlink(FEED_PIPE);
-                exit(EXIT_FAILURE);
-            }
-
-            read(feed_fd, buffer, MAX_MSG_SIZE);
-            printf("Mensagem: %s\n", buffer);
-
-            close(feed_fd);
+        if (strcmp(buffer, EXIT) == 0) {
+            break;
         }
 
-     }while (strcmp(buffer,EXIT) != 0);
-    
-    
+        if(processCommand(buffer) == 1){
+            strcpy(comunicacao.buffer, buffer);
+            sendMsg(comunicacao);
+        }
+
+    } while (1);
+
+    unlink(FEED_PIPE);
     return 0;
 }
-

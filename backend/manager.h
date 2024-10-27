@@ -5,10 +5,10 @@
 
 typedef struct 
 {
-    int n_user;
+    int n_users;
     int n_topics;
-    Topic *topics;
-    User *users;  
+    Topic topic[20];
+    User user[10];  
 } TDATA;
 
 #endif

@@ -7,9 +7,8 @@
 
 typedef struct Comunicacao {
     User user;
-    Topic topic;
-    Msg msg;
-    char FEED_PIPE[256]; 
+    Topic topic[20];
+    int n_topics;
     char buffer[300];
     char command[20];
     char tipoPedido[40];

@@ -22,10 +22,10 @@ void cleanup(int signo){
 
 void sendMsg(Comunicacao comunicacao){
     int feed_fd;
-    feed_fd = open(comunicacao.FEED_PIPE,O_WRONLY);
+    feed_fd = open(comunicacao.user.FEED_PIPE,O_WRONLY);
 
     if (feed_fd == -1) {
-        perror("Erro ao abrir FEED_PIPE");
+        perror(ERROR_OPENING_FEED_PIPE);
         exit(EXIT_FAILURE);
     }
 
@@ -39,7 +39,7 @@ Comunicacao receiveMsg(){
     
     manager_fd = open(MANAGER_PIPE, O_RDONLY);
     if (manager_fd == -1) {
-        perror("Erro ao abrir MANAGER_PIPE");
+        perror(ERROR_OPENING_MANAGER_PIPE);
         exit(EXIT_FAILURE);
     }
 
@@ -61,14 +61,92 @@ int countWords(char *buffer){
     return spaces + 1;
 }
 
-void showTopics(Comunicacao comunicacao) {
-    printf("entrou");
-    strcpy(comunicacao.buffer,"ola");
+void showTopics(Comunicacao comunicacao,TDATA *td) {
+    comunicacao.n_topics = td->n_topics;
+    for(int i = 0; i < td->n_topics;i++){
+        strcpy(comunicacao.topic[i].nome,td->topic[i].nome);
+        comunicacao.topic[i].n_persistentes = td->topic[i].n_persistentes;
+        strcpy(comunicacao.topic[i].estado,td->topic[i].estado);
+    }
+
     sendMsg(comunicacao);
 }
 
+void writeMsg(Comunicacao comunicacao,TDATA *td){
+    int index = -1;
 
-void processCommandAdm(char *buffer){
+    char *command = strtok(comunicacao.buffer, SPACE);
+    char *topic = strtok(NULL, SPACE);
+    char *duration = strtok(NULL, SPACE);
+    char *message = strtok(NULL, "");
+
+    for(int i = 0; i < td->n_topics;i++){
+        if(strcmp(topic,td[i].topic->nome)){
+            index = i;
+            break;
+        }
+    }
+
+    if(index == -1){
+        if(td->n_topics >= MAX_TOPICS){
+            strcpy(comunicacao.buffer,"Maximo de topicos atingido\n");
+            sendMsg(comunicacao);
+            return;
+        }else{
+            strcpy(td->topic[td->n_topics].nome,topic);
+            td->topic[td->n_topics].n_persistentes;
+            strcpy(td->topic[td->n_topics].estado,"desbloqueado");
+            td->n_topics ++;
+         }
+    }
+
+
+    if(duration == 0){// mensagem nao persistente
+
+    }else{ //mensagem persistente
+
+    }
+    sendMsg(comunicacao);
+}
+
+void listUsers(TDATA *td){
+    if(td->n_users == 0){
+        printf("Nenhum user conectado ate ao momento.\n");
+    }else{
+        printf("Users conectados:\n");
+        for(int i = 0; i < td->n_users; i++){
+            printf("- %s \n",td->user[i].nome);
+        }
+    }
+}
+
+void removeUser(TDATA *td, char *buffer) {
+    char *username = strtok(NULL, SPACE);
+    int user_found = 0;
+    Comunicacao comunicacao;
+
+    for (int i = 0; i < td->n_users; i++) {
+        if (strcmp(td->user[i].nome, username) == 0) {
+            user_found = 1;
+            strcpy(comunicacao.user.FEED_PIPE,td->user[i].FEED_PIPE);
+            strcpy(comunicacao.command,EXIT);
+            for (int j = i; j < td->n_users - 1; j++) {
+                strcpy(td->user[j].nome, td->user[j + 1].nome);
+            }
+            td->n_users--;
+            printf("User %s removido com sucesso.\n", username);
+            break;
+        }
+    }
+
+    if (!user_found) {
+        printf("User %s não encontrado.\n", username);
+    }
+
+    sendMsg(comunicacao);
+}
+
+void processCommandAdm(char *buffer, TDATA *td){
     int index = -1;
     char *command;
     command = strtok(buffer,SPACE);
@@ -84,8 +162,10 @@ void processCommandAdm(char *buffer){
     switch (index)
     {
     case 0:
+        listUsers(td);
         break;
     case 1:
+        removeUser(td,buffer);
         break;
     case 2:
         break;
@@ -107,62 +187,73 @@ void *process_orders(void *ptdata) {
     TDATA *td = (TDATA *)ptdata;
     Comunicacao comunicacao;
 
+    
     while (1) {
         comunicacao = receiveMsg();
 
         if(strcmp(comunicacao.tipoPedido,"login") == 0){
-            strcpy(comunicacao.buffer, "login_success");
+            if(td->n_users == MAX_USERS){
+                strcpy(comunicacao.buffer, MAX_USERS_REACHED);
+            }else{
+                int user_exists = 0;
+                for(int i = 0; i < td->n_users; i++){
+                    if(strcmp(td->user[i].nome,comunicacao.user.nome) == 0){
+                        user_exists = 1;
+                        break;
+                    }
+                }
+                if(user_exists){
+                    strcpy(comunicacao.buffer, USERNAME_ALREADY_EXISTS);
+                }else{
+                    //adicionar user
+                    strcpy(comunicacao.buffer,LOGIN_SUCCESS);
+                    strcpy(td->user[td->n_users].nome,comunicacao.user.nome);
+                    strcpy(td->user[td->n_users].FEED_PIPE,comunicacao.user.FEED_PIPE);
+                    td->n_users = td->n_users + 1;
+                    
+                }
+            }
+
             strcpy(comunicacao.tipoPedido, "linha_commands");
             sendMsg(comunicacao);
-        }
+        }else{
+            command = strtok(comunicacao.buffer, SPACE);
+            strcpy(comunicacao.command,command);
 
-        comunicacao = receiveMsg();
+            for (int i = 0; i < N_COMMANDS_USER; i++) {
+                if (strcmp(command, COMMANDS_USER[i]) == 0) {
+                    index = i;
+                    break;
+                }
+            }
 
-        command = strtok(comunicacao.buffer, SPACE);
+            switch (index) {
+                case 0: // TOPICS
+                    showTopics(comunicacao,td);
+                    break;
+                case 1: // MSG
+                    writeMsg(comunicacao,td);
+                    break;
+                case 2: // SUBSCRIBE
+                    //subscribeTopics();
+                    break;
+                case 3: // UNSUBSCRIBE
+                    //unsubscribeTopics();
+                    break;
+                case 4: // HELP
+                    //helpUser();
+                    break;
+                default:
+                    //sendMsg("Comando inválido\n");
+                    continue;
+            }
 
-        for (int i = 0; i < N_COMMANDS_USER; i++) {
-            if (strcmp(command, COMMANDS_USER[i]) == 0) {
-                index = i;
+            if (strcmp(comunicacao.buffer, EXIT) == 0) {
+                printf("A terminar o manager\n");
                 break;
             }
+
         }
-
-        switch (index) {
-            case 0: // TOPICS
-                showTopics(comunicacao);
-                break;
-            case 1: // MSG
-                //writeMsg();
-                break;
-            case 2: // SUBSCRIBE
-                //subscribeTopics();
-                break;
-            case 3: // UNSUBSCRIBE
-                //unsubscribeTopics();
-                break;
-            case 4: // HELP
-                //helpUser();
-                break;
-            default:
-                //sendMsg("Comando inválido\n");
-                continue;
-        }
-
-        if (strcmp(comunicacao.buffer, EXIT) == 0) {
-            printf("A terminar o manager\n");
-            break;
-        }
-
-        feed_fd = open(comunicacao.FEED_PIPE, O_WRONLY);
-        if (feed_fd == -1) {
-            perror("Erro ao abrir FEED_PIPE");
-            exit(EXIT_FAILURE);
-        }
-
-        strcpy(comunicacao.buffer, "...");
-
-        write(feed_fd, comunicacao.buffer, strlen(comunicacao.buffer) + 1);
-        close(feed_fd);
     }
 
     return NULL;
@@ -175,6 +266,9 @@ int main(int argc, char *argv[]) {
     char *command;
 
     TDATA td;
+    td.n_topics = 0;
+    td.n_users = 0;
+    td.topic->n_persistentes = 0;
 
     signal(SIGINT,cleanup);
 
@@ -196,7 +290,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (pthread_create(&thread, NULL, process_orders, (void*)&td) != 0) {
-        perror("Erro ao criar o thread");
+        perror(ERROR_CREATING_THREAD);
         return 1;
     }
 
@@ -216,7 +310,7 @@ int main(int argc, char *argv[]) {
 
         buffer[strlen(buffer) - 1] = '\0';
 
-        processCommandAdm(buffer);
+        processCommandAdm(buffer,&td);
 
     }while(strcmp(buffer,CLOSE));
 

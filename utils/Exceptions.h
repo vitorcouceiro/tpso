@@ -2,6 +2,8 @@
 #define INFO_HEADER "[INFO]"
 //Info
 #define EMPTY_COMMAND INFO_HEADER " Comando vazio.\n"
+#define LOGIN_SUCCESS INFO_HEADER " Login efetuado com sucesso!\n"
+#define NO_TOPICS INFO_HEADER " Ainda nao existem topicos!!\n"
 //Error
 #define INVALID_ARGS_FEED ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./feed <nome>\n" 
 #define INVALID_ARGS_MANA ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./manager\n" 
@@ -19,3 +21,7 @@
 #define MANAGER_NOT_RUNNING ERRO_HEADER " Nao existe um manager em funcionamento. \n"
 #define ERROR_CREATING_MONITOR_THREAD ERRO_HEADER " Erro ao criar thread de monitoramento.\n"
 #define ERROR_OPENING_MANAGER_PIPE ERRO_HEADER " Erro ao abrir MANAGER_PIPE.\n"
+#define ERROR_OPENING_FEED_PIPE ERRO_HEADER " Erro ao abrir FEED_PIPE.\n"
+#define ERROR_CREATING_THREAD ERRO_HEADER " Erro ao criar o thread.\n"
+#define USERNAME_ALREADY_EXISTS ERRO_HEADER " Nome de user já existe!!\n"
+#define ERROR_CREATING_RESPONSE_THREAD ERRO_HEADER " Erro ao criar thread de resposta.\n"

@@ -3,6 +3,7 @@
 //Globals
 #define MAX_MSG_SIZE 300
 #define MAX_USERS 10
+#define MAX_TOPICS 20
 #define N_COMMANDS_USER 4
 #define N_COMMANDS_ADM 6
 

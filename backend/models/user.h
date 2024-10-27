@@ -4,7 +4,7 @@
 typedef struct 
 {
     char nome[10];
-    int pid;
+    char FEED_PIPE[256]; 
 } User;
 
 #endif // USER_H

@@ -148,10 +148,16 @@ void removeUser(TDATA *td, char *buffer) {
 
 void processCommandAdm(char *buffer, TDATA *td){
     int index = -1;
+    int n_topics;
     char *command;
+
+    if(strcmp(buffer,"") == 0){
+        return;
+    }
+
     command = strtok(buffer,SPACE);
 
-    int n_topics = countWords(buffer);
+    n_topics = countWords(buffer);
 
     for(int i = 0; i < N_COMMANDS_ADM; i++){
         if(strcmp(command,COMMANDS_ADM[i]) == 0){
@@ -159,24 +165,40 @@ void processCommandAdm(char *buffer, TDATA *td){
         }
     }
 
+    if(index == -1){
+        printf(INVALID_COMMAND);
+        return;
+    }
+
     switch (index)
     {
-    case 0:
-        listUsers(td);
-        break;
-    case 1:
-        removeUser(td,buffer);
-        break;
-    case 2:
-        break;
-    case 3:
-        break;
-    case 4:
-        break;
-    case 5:
-        break;
-    default:
-        break;
+        case 0:
+            if(n_topics == 1){
+                listUsers(td);
+            }else{
+                printf(SYNTAX_ERROR_USERS);
+                return;
+            }
+            break;
+        case 1:
+            if(n_topics = 2){
+                removeUser(td,buffer);
+            }else{
+                printf(SYNTAX_ERROR_REMOVE_USER);
+                return;
+            }
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
+        default:
+            
+            break;
     }
 }
 
@@ -216,6 +238,15 @@ void *process_orders(void *ptdata) {
 
             strcpy(comunicacao.tipoPedido, "linha_commands");
             sendMsg(comunicacao);
+        }else if(strcmp(comunicacao.tipoPedido,"logout")==0){
+            for(int i = 0; i < td->n_users;i++){
+                if(strcmp(comunicacao.user.nome,td->user[i].nome) == 0){
+                    for (int j = i; j < td->n_users - 1; j++) {
+                        strcpy(td->user[j].nome, td->user[j + 1].nome);
+                     }
+                    td->n_users--;
+                }
+            }
         }else{
             command = strtok(comunicacao.buffer, SPACE);
             strcpy(comunicacao.command,command);

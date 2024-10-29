@@ -4,6 +4,7 @@
 #define EMPTY_COMMAND INFO_HEADER " Comando vazio.\n"
 #define LOGIN_SUCCESS INFO_HEADER " Login efetuado com sucesso!\n"
 #define NO_TOPICS INFO_HEADER " Ainda nao existem topicos!!\n"
+#define USER_REMOVED INFO_HEADER " Fostes eleminado da plataforma!!\n"
 //Error
 #define INVALID_ARGS_FEED ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./feed <nome>\n" 
 #define INVALID_ARGS_MANA ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./manager\n" 
@@ -12,7 +13,9 @@
 #define SYNTAX_ERROR_MSG ERRO_HEADER " Erro de sintaxe. Sintaxe: msg <topico> <duracao> <mensagem>\n"
 #define SYNTAX_ERROR_SUBCRIBE ERRO_HEADER " Erro de sintaxe. Sintaxe: subscribe <topico>\n"
 #define SYNTAX_ERROR_UNSUBCRIBE ERRO_HEADER " Erro de sintaxe. Sintaxe: unsubscribe <topico>\n"
+#define SYNTAX_ERROR_USERS ERRO_HEADER " Erro de sintaxe. Sintaxe: users\n"
 #define SYNTAX_ERROR_HELP ERRO_HEADER " Erro de sintaxe. Sintaxe: help\n"
+#define SYNTAX_ERROR_REMOVE_USER ERRO_HEADER " Erro de sintaxe. Sintaxe: remove <nome>\n"
 #define TOPIC_LENGTH_ERROR ERRO_HEADER " O topico nao pode ter mais de 20 caracteres.\n"
 #define MESSAGE_LENGTH_ERROR ERRO_HEADER " A mensagem nao pode ter mais de 300 caracteres.\n"
 #define INVALID_COMMAND ERRO_HEADER " Comando invalido.\n"

@@ -13,6 +13,8 @@
 #include "../utils/Exceptions.h"
 #include "../utils/Globals.h"
 
+
+
 int countWords(char *buffer){
     int spaces = 0;
 
@@ -42,6 +44,11 @@ int processCommand (char *buffer){
     int index = -1;
     int n_topics;
     char *command;
+
+    if(strcmp(buffer,"") == 0){
+        return 0;
+    }
+
     command = strtok(buffer, SPACE);
 
     n_topics = countWords(buffer);
@@ -160,12 +167,15 @@ Comunicacao receiveMsg(char *FEED_PIPE){
 }
 
 
-void *handleManagerResponse(void *arg) {
-    char *FEED_PIPE = (char *)arg;
+void *handleManagerResponse(void *ptdata) {
+    TFEED *td = (TFEED *)ptdata;
     Comunicacao comunicacao;
 
     while (1) {
-        comunicacao = receiveMsg(FEED_PIPE);
+        comunicacao = receiveMsg(td->FEED_PIPE);
+        
+
+        pthread_mutex_lock(td->ptrinco1);
         if (strcmp(comunicacao.command, TOPICS) == 0) {
             if (comunicacao.n_topics == 0) {
                 printf(NO_TOPICS);
@@ -178,54 +188,78 @@ void *handleManagerResponse(void *arg) {
                 }
             }
         } else if(strcmp(comunicacao.command, EXIT) == 0){
-            
+            // Tratar o comando EXIT conforme necessário
+            printf(USER_REMOVED);
+
         }
+        pthread_cond_signal(td->cond);  // Sinaliza a condição
+        pthread_mutex_unlock(td->ptrinco1);
     }
     return NULL;
 }
 
-int main (int argc, char *argv[]){
-    int feed_fd,manager_fd;
-    char buffer[MAX_MSG_SIZE];
-    pthread_t monitor_thread, response_thread;
-    Comunicacao comunicacao;
-    pid_t pid = getpid();
-    char FEED_PIPE[256];
 
-    if(argc != 2){
+int main(int argc, char *argv[]) {
+    int feed_fd, manager_fd;
+    char buffer[MAX_MSG_SIZE];
+    char FEED_PIPE[256];
+    pthread_t monitor_thread, response_thread;
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;         // Declaração da condição
+    Comunicacao comunicacao;
+    TFEED td;
+    
+    if (pthread_mutex_init(&mutex, NULL) != 0) {
+        perror("Erro ao iniciar o mutex");
+        exit(EXIT_FAILURE);
+    }
+
+    if (pthread_cond_init(&cond, NULL) != 0) {  // Inicialização da condição
+        perror("Erro ao iniciar a condição");
+        exit(EXIT_FAILURE);
+    }
+
+    if (argc != 2) {
         printf(INVALID_ARGS_FEED);
         exit(EXIT_FAILURE);
     }
 
-    if(access(MANAGER_PIPE,F_OK) != 0){
+    if (access(MANAGER_PIPE, F_OK) != 0) {
         printf(MANAGER_NOT_RUNNING);
         exit(EXIT_FAILURE);
     }
 
-    snprintf(FEED_PIPE, sizeof(FEED_PIPE), "../tmp/pipe_%d", pid);
-    mkfifo(FEED_PIPE,0660);
+    snprintf(FEED_PIPE, sizeof(FEED_PIPE), "../tmp/pipe_%d", getpid());
+    strcpy(td.FEED_PIPE, FEED_PIPE);
+    td.ptrinco1 = &mutex;
+    td.cond = &cond; 
 
-    strcpy(comunicacao.user.FEED_PIPE,FEED_PIPE);
+    mkfifo(FEED_PIPE, 0660);
+    strcpy(comunicacao.user.FEED_PIPE, FEED_PIPE);
 
-    if(pthread_create(&monitor_thread, NULL, monitorServer, (void *)FEED_PIPE) != 0){
+    if (pthread_create(&monitor_thread, NULL, monitorServer, (void *)FEED_PIPE) != 0) {
         perror(ERROR_CREATING_MONITOR_THREAD);
         unlink(FEED_PIPE);
+        pthread_mutex_destroy(&mutex);
+        pthread_cond_destroy(&cond);  
         exit(EXIT_FAILURE);
     }
 
-    if(pthread_create(&response_thread, NULL, handleManagerResponse, (void *)FEED_PIPE) != 0){
+    if (pthread_create(&response_thread, NULL, handleManagerResponse, (void *)&td) != 0) {
         perror(ERROR_CREATING_RESPONSE_THREAD);
         unlink(FEED_PIPE);
+        pthread_mutex_destroy(&mutex);
+        pthread_cond_destroy(&cond);  
         exit(EXIT_FAILURE);
     }
 
-    strcpy(comunicacao.user.nome,argv[1]);
-    strcpy(comunicacao.tipoPedido,"login");
-    
+    strcpy(comunicacao.user.nome, argv[1]);
+    strcpy(comunicacao.tipoPedido, "login");
+
     sendMsg(comunicacao);
     comunicacao = receiveMsg(FEED_PIPE);
 
-    if (strcmp(comunicacao.buffer,LOGIN_SUCCESS) != 0) { 
+    if (strcmp(comunicacao.buffer, LOGIN_SUCCESS) != 0) { 
         printf(comunicacao.buffer);
         close(feed_fd);
         unlink(FEED_PIPE);
@@ -233,32 +267,39 @@ int main (int argc, char *argv[]){
     }
     printf(comunicacao.buffer);
 
-    do{
+    do {
+        pthread_mutex_lock(&mutex);
+
         printf("cmd > ");
+        fflush(stdout);
 
         if (fgets(buffer, MAX_MSG_SIZE, stdin) == NULL) {
             printf(ERROR_READING_COMMAND);
-            continue;
-        }
-
-        if (buffer[0] == '\n') {
-            printf(EMPTY_COMMAND);
+            pthread_mutex_unlock(&mutex);
             continue;
         }
 
         buffer[strlen(buffer) - 1] = '\0';
 
         if (strcmp(buffer, EXIT) == 0) {
+            strcpy(comunicacao.tipoPedido,"logout");
+            sendMsg(comunicacao);
             break;
         }
 
-        if(processCommand(buffer) == 1){
+        if (processCommand(buffer) == 1) {
             strcpy(comunicacao.buffer, buffer);
             sendMsg(comunicacao);
+            pthread_cond_wait(&cond, &mutex);
         }
+
+        pthread_mutex_unlock(&mutex);
 
     } while (1);
 
     unlink(FEED_PIPE);
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&cond);  
     return 0;
 }
+

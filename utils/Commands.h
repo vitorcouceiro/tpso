@@ -4,7 +4,6 @@
 #define MSG "msg"
 #define SUBCRIBE "subcribe"
 #define UNSUBCRIBE "unsubcribe"
-// #define HELP "help"
 
 //Commands Admin
 #define USERS "users"
@@ -14,3 +13,6 @@
 #define LOCK "lock"
 #define UNLOCK "unlock"
 #define CLOSE "close"
+
+//Respostas do manager
+#define EXIT_INFO "exit_info"

@@ -68,7 +68,7 @@ void showTopics(Comunicacao comunicacao,TDATA *td) {
         comunicacao.topic[i].n_persistentes = td->topic[i].n_persistentes;
         strcpy(comunicacao.topic[i].estado,td->topic[i].estado);
     }
-
+    strcpy(comunicacao.tipoInformacao,TOPICS);
     sendMsg(comunicacao);
 }
 
@@ -129,13 +129,19 @@ void removeUser(TDATA *td, char *buffer) {
         if (strcmp(td->user[i].nome, username) == 0) {
             user_found = 1;
             strcpy(comunicacao.user.FEED_PIPE,td->user[i].FEED_PIPE);
-            strcpy(comunicacao.command,EXIT);
+            strcpy(comunicacao.tipoInformacao,EXIT);
             for (int j = i; j < td->n_users - 1; j++) {
                 strcpy(td->user[j].nome, td->user[j + 1].nome);
             }
             td->n_users--;
             printf("User %s removido com sucesso.\n", username);
+            sendMsg(comunicacao);
             break;
+        }else{
+            strcpy(comunicacao.user.FEED_PIPE,td->user[i].FEED_PIPE);
+            strcpy(comunicacao.tipoInformacao,EXIT_INFO);
+            strcpy(comunicacao.buffer,td->user[i].nome);
+            sendMsg(comunicacao);
         }
     }
 
@@ -143,7 +149,8 @@ void removeUser(TDATA *td, char *buffer) {
         printf("User %s não encontrado.\n", username);
     }
 
-    sendMsg(comunicacao);
+    
+
 }
 
 void processCommandAdm(char *buffer, TDATA *td){
@@ -151,13 +158,14 @@ void processCommandAdm(char *buffer, TDATA *td){
     int n_topics;
     char *command;
 
+
     if(strcmp(buffer,"") == 0){
         return;
     }
 
-    command = strtok(buffer,SPACE);
-
     n_topics = countWords(buffer);
+
+    command = strtok(buffer,SPACE);
 
     for(int i = 0; i < N_COMMANDS_ADM; i++){
         if(strcmp(command,COMMANDS_ADM[i]) == 0){
@@ -181,7 +189,7 @@ void processCommandAdm(char *buffer, TDATA *td){
             }
             break;
         case 1:
-            if(n_topics = 2){
+            if(n_topics == 2){
                 removeUser(td,buffer);
             }else{
                 printf(SYNTAX_ERROR_REMOVE_USER);
@@ -301,6 +309,8 @@ int main(int argc, char *argv[]) {
     td.n_users = 0;
     td.topic->n_persistentes = 0;
 
+    system("clear"); 
+    
     signal(SIGINT,cleanup);
 
     if(argc != 1){
@@ -333,13 +343,17 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
+        
 
         if (buffer[0] == '\n') {
             printf(EMPTY_COMMAND);
             continue;
         }
 
+        
+
         buffer[strlen(buffer) - 1] = '\0';
+        
 
         processCommandAdm(buffer,&td);
 

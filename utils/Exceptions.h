@@ -4,7 +4,7 @@
 #define EMPTY_COMMAND INFO_HEADER " Comando vazio.\n"
 #define LOGIN_SUCCESS INFO_HEADER " Login efetuado com sucesso!\n"
 #define NO_TOPICS INFO_HEADER " Ainda nao existem topicos!!\n"
-#define USER_REMOVED INFO_HEADER " Fostes eleminado da plataforma!!\n"
+#define USER_REMOVED INFO_HEADER " Fostes expulso da plataforma!!\n"
 //Error
 #define INVALID_ARGS_FEED ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./feed <nome>\n" 
 #define INVALID_ARGS_MANA ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./manager\n" 

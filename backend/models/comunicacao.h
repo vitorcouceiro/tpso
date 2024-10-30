@@ -12,6 +12,7 @@ typedef struct Comunicacao {
     char buffer[300];
     char command[20];
     char tipoPedido[40];
+    char tipoInformacao[50]; 
 } Comunicacao;
 
 #endif // COMUNICACAO_H

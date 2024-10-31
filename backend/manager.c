@@ -22,7 +22,7 @@ void cleanup(int signo){
 
 void sendMsg(Comunicacao comunicacao){
     int feed_fd;
-    feed_fd = open(comunicacao.user.FEED_PIPE,O_WRONLY);
+    feed_fd = open(comunicacao.user.FEED_PIPE, O_WRONLY);
 
     if (feed_fd == -1) {
         perror(ERROR_OPENING_FEED_PIPE);
@@ -33,10 +33,11 @@ void sendMsg(Comunicacao comunicacao){
     close(feed_fd);
 }
 
-Comunicacao receiveMsg(){
+/*Comunicacao receiveMsg(){
     int manager_fd;
     Comunicacao comunicacao;
-    
+    memset(&comunicacao, 0, sizeof(Comunicacao)); // Inicializa a estrutura
+
     manager_fd = open(MANAGER_PIPE, O_RDONLY);
     if (manager_fd == -1) {
         perror(ERROR_OPENING_MANAGER_PIPE);
@@ -44,10 +45,10 @@ Comunicacao receiveMsg(){
     }
 
     read(manager_fd, &comunicacao, sizeof(Comunicacao));
-    close(manager_fd);
 
+    close(manager_fd);
     return comunicacao;
-}
+}*/
 
 int countWords(char *buffer){
     int spaces = 0;
@@ -81,7 +82,7 @@ void writeMsg(Comunicacao comunicacao,TDATA *td){
     char *message = strtok(NULL, "");
 
     for(int i = 0; i < td->n_topics;i++){
-        if(strcmp(topic,td[i].topic->nome)){
+        if(strcmp(topic, td->topic[i].nome) == 0){
             index = i;
             break;
         }
@@ -94,7 +95,7 @@ void writeMsg(Comunicacao comunicacao,TDATA *td){
             return;
         }else{
             strcpy(td->topic[td->n_topics].nome,topic);
-            td->topic[td->n_topics].n_persistentes;
+            td->topic[td->n_topics].n_persistentes = 0;
             strcpy(td->topic[td->n_topics].estado,"desbloqueado");
             td->n_topics ++;
          }
@@ -159,7 +160,7 @@ void processCommandAdm(char *buffer, TDATA *td){
     char *command;
 
 
-    if(strcmp(buffer,"") == 0){
+    if(buffer == NULL || strcmp(buffer, "") == 0){
         return;
     }
 
@@ -212,52 +213,54 @@ void processCommandAdm(char *buffer, TDATA *td){
 
 void *process_orders(void *ptdata) {
     int manager_fd, feed_fd;
-    int index;
+    int index = -1;
     char *command;
     TDATA *td = (TDATA *)ptdata;
     Comunicacao comunicacao;
 
+    manager_fd = open(MANAGER_PIPE, O_RDWR);
+    if (manager_fd == -1) {
+        perror(ERROR_OPENING_MANAGER_PIPE);
+        exit(EXIT_FAILURE);
+    }
     
     while (1) {
-        comunicacao = receiveMsg();
-
-        if(strcmp(comunicacao.tipoPedido,"login") == 0){
-            if(td->n_users == MAX_USERS){
+        read(manager_fd, &comunicacao, sizeof(Comunicacao));
+        
+        if (strcmp(comunicacao.tipoPedido, "login") == 0) {
+            if (td->n_users == MAX_USERS) {
                 strcpy(comunicacao.buffer, MAX_USERS_REACHED);
-            }else{
+            } else {
                 int user_exists = 0;
-                for(int i = 0; i < td->n_users; i++){
-                    if(strcmp(td->user[i].nome,comunicacao.user.nome) == 0){
+                for (int i = 0; i < td->n_users; i++) {
+                    if (strcmp(td->user[i].nome, comunicacao.user.nome) == 0) {
                         user_exists = 1;
                         break;
                     }
                 }
-                if(user_exists){
+                if (user_exists) {
                     strcpy(comunicacao.buffer, USERNAME_ALREADY_EXISTS);
-                }else{
-                    //adicionar user
-                    strcpy(comunicacao.buffer,LOGIN_SUCCESS);
-                    strcpy(td->user[td->n_users].nome,comunicacao.user.nome);
-                    strcpy(td->user[td->n_users].FEED_PIPE,comunicacao.user.FEED_PIPE);
-                    td->n_users = td->n_users + 1;
-                    
+                } else {
+                    // Adicionar user
+                    strcpy(comunicacao.buffer, LOGIN_SUCCESS);
+                    strcpy(td->user[td->n_users].nome, comunicacao.user.nome);
+                    strcpy(td->user[td->n_users].FEED_PIPE, comunicacao.user.FEED_PIPE);
+                    td->n_users++;
                 }
             }
-
-            strcpy(comunicacao.tipoPedido, "linha_commands");
             sendMsg(comunicacao);
-        }else if(strcmp(comunicacao.tipoPedido,"logout")==0){
-            for(int i = 0; i < td->n_users;i++){
-                if(strcmp(comunicacao.user.nome,td->user[i].nome) == 0){
+        } else if (strcmp(comunicacao.tipoPedido, "logout") == 0) {
+            for (int i = 0; i < td->n_users; i++) {
+                if (strcmp(comunicacao.user.nome, td->user[i].nome) == 0) {
                     for (int j = i; j < td->n_users - 1; j++) {
                         strcpy(td->user[j].nome, td->user[j + 1].nome);
-                     }
+                    }
                     td->n_users--;
                 }
             }
-        }else{
+        } else if (strcmp(comunicacao.tipoPedido, "linha_commands") == 0) {
             command = strtok(comunicacao.buffer, SPACE);
-            strcpy(comunicacao.command,command);
+            strcpy(comunicacao.command, command);
 
             for (int i = 0; i < N_COMMANDS_USER; i++) {
                 if (strcmp(command, COMMANDS_USER[i]) == 0) {
@@ -266,24 +269,30 @@ void *process_orders(void *ptdata) {
                 }
             }
 
+            if (index == -1) {
+                strcpy(comunicacao.buffer, INVALID_COMMAND);
+                sendMsg(comunicacao);
+                continue;
+            }
+
             switch (index) {
                 case 0: // TOPICS
-                    showTopics(comunicacao,td);
+                    showTopics(comunicacao, td);
                     break;
                 case 1: // MSG
-                    writeMsg(comunicacao,td);
+                    writeMsg(comunicacao, td);
                     break;
                 case 2: // SUBSCRIBE
-                    //subscribeTopics();
+                    // subscribeTopics();
                     break;
                 case 3: // UNSUBSCRIBE
-                    //unsubscribeTopics();
+                    // unsubscribeTopics();
                     break;
                 case 4: // HELP
-                    //helpUser();
+                    // helpUser();
                     break;
                 default:
-                    //sendMsg("Comando inválido\n");
+                    // sendMsg("Comando inválido\n");
                     continue;
             }
 
@@ -294,7 +303,7 @@ void *process_orders(void *ptdata) {
 
         }
     }
-
+    close(manager_fd);
     return NULL;
 }
 
@@ -311,21 +320,24 @@ int main(int argc, char *argv[]) {
 
     system("clear"); 
     
-    signal(SIGINT,cleanup);
+    signal(SIGINT, cleanup);
 
-    if(argc != 1){
+    if (argc != 1) {
         printf(INVALID_ARGS_MANA);
         exit(EXIT_FAILURE);
     }
 
-    if(access(MANAGER_PIPE,F_OK) == 0){
+    if (access(MANAGER_PIPE, F_OK) == 0) {
         printf(MANAGER_ALREADY_RUNNING);
         exit(EXIT_FAILURE);
     }
 
-    mkfifo(MANAGER_PIPE,0660);
+    if (mkfifo(MANAGER_PIPE, 0660) == -1) {
+        perror("Erro ao criar MANAGER_PIPE");
+        exit(EXIT_FAILURE);
+    }
     
-    if(access(MANAGER_PIPE,F_OK) != 0){
+    if (access(MANAGER_PIPE, F_OK) != 0) {
         printf(MANAGER_NOT_RUNNING);
         exit(EXIT_FAILURE);
     }
@@ -335,29 +347,24 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    do{
+    do {
         printf("cmd > ");
 
         if (fgets(buffer, MAX_MSG_SIZE, stdin) == NULL) {
             printf(ERROR_READING_COMMAND);
             continue;
         }
-
-        
-
+    
         if (buffer[0] == '\n') {
             printf(EMPTY_COMMAND);
             continue;
         }
 
-        
-
         buffer[strlen(buffer) - 1] = '\0';
-        
 
-        processCommandAdm(buffer,&td);
+        processCommandAdm(buffer, &td);
 
-    }while(strcmp(buffer,CLOSE));
+    } while (strcmp(buffer, CLOSE) != 0);
 
     unlink(MANAGER_PIPE);
     return 0;

@@ -29,7 +29,8 @@ void *monitorServer(void *arg){
     char *FEED_PIPE = (char *)arg;
     while(1){
         if(access(MANAGER_PIPE,F_OK) != 0){
-            printf(ERROR_OPENING_MANAGER_PIPE);
+            system("clear");
+            printf(MANAGER_SHUTDOWN);
             unlink(FEED_PIPE);
             exit(EXIT_FAILURE);
         }
@@ -107,7 +108,7 @@ int processCommand (char *buffer){
 
                 return 1;
             }else{
-                printf(SYNTAX_ERROR_SUBCRIBE);
+                printf(SYNTAX_ERROR_SUBSCRIBE);
                 return 0;
             }
         case 3: // UNSUBSCRIBE
@@ -121,7 +122,7 @@ int processCommand (char *buffer){
 
                 return 1;
             }else{
-                printf(SYNTAX_ERROR_UNSUBCRIBE);
+                printf(SYNTAX_ERROR_UNSUBSCRIBE);
                 return 0;
             }
         case 4: // HELP
@@ -135,40 +136,6 @@ int processCommand (char *buffer){
             return 0;
     }
 }
-
-/*void sendMsg(Comunicacao comunicacao){
-    int manager_fd;
-    
-    manager_fd = open(MANAGER_PIPE,O_WRONLY);
-    if (manager_fd == -1) {
-        pthread_mutex_lock(&terminal_mutex);
-        perror(ERROR_OPENING_MANAGER_PIPE);
-        pthread_mutex_unlock(&terminal_mutex);
-        exit(EXIT_FAILURE);
-    }
-
-    write(manager_fd, &comunicacao, sizeof(Comunicacao));
-}*/
-
-/*Comunicacao receiveMsg(char *FEED_PIPE) {
-    int feed_fd;
-    Comunicacao comunicacao;
-    memset(&comunicacao, 0, sizeof(Comunicacao)); // Inicializa a estrutura
-
-    feed_fd = open(FEED_PIPE, O_RDONLY);
-    if (feed_fd == -1) {
-        pthread_mutex_lock(&terminal_mutex);
-        perror(ERROR_OPENING_FEED_PIPE);
-        pthread_mutex_unlock(&terminal_mutex);
-        unlink(FEED_PIPE);
-        exit(EXIT_FAILURE);
-    }
-
-    read(feed_fd, &comunicacao, sizeof(Comunicacao));
-
-    close(feed_fd);
-    return comunicacao;
-}*/
 
 void *handleManagerResponse(void *ptdata) {
     TFEED *td = (TFEED *)ptdata;
@@ -184,9 +151,10 @@ void *handleManagerResponse(void *ptdata) {
     }
 
     while (1) {
-        //comunicacao = receiveMsg(td->FEED_PIPE);
         read(feed_fd, &comunicacao, sizeof(Comunicacao));
-        
+
+        system("clear"); 
+
         if (strcmp(comunicacao.tipoInformacao, TOPICS) == 0) {
             if (comunicacao.n_topics == 0) {
                 printf(NO_TOPICS);
@@ -203,8 +171,11 @@ void *handleManagerResponse(void *ptdata) {
             printf(USER_REMOVED);
             exit(EXIT_FAILURE);             
         } else if(strcmp(comunicacao.tipoInformacao,EXIT_INFO) == 0){
-            printf("O user %s foi expulso da plataforma\n",comunicacao.buffer);
+            printf(USER_REMOVED_SPECIFIC,comunicacao.buffer);
         }
+
+        printf("cmd > ");
+        fflush(stdout);
     }
     close(feed_fd);
     return NULL;
@@ -218,7 +189,7 @@ int main(int argc, char *argv[]) {
     Comunicacao comunicacao;
     TFEED td;
     
-
+    system("clear"); 
 
     if (argc != 2) {
         printf(INVALID_ARGS_FEED);
@@ -233,13 +204,17 @@ int main(int argc, char *argv[]) {
     snprintf(FEED_PIPE, sizeof(FEED_PIPE), "../tmp/pipe_%d", getpid());
     strcpy(td.FEED_PIPE, FEED_PIPE);
 
-    mkfifo(FEED_PIPE, 0660);
+    if(mkfifo(FEED_PIPE, 0660)==-1){
+        perror(ERROR_CREATING_FEED_PIPE);
+        exit(EXIT_FAILURE);
+    }
+
     strcpy(comunicacao.user.FEED_PIPE, FEED_PIPE);
 
 
     manager_fd = open(MANAGER_PIPE, O_WRONLY);
     if (manager_fd == -1) {
-        perror("Erro ao abrir MANAGER_PIPE");
+        perror(ERROR_OPENING_MANAGER_PIPE);
         close(feed_fd);
         unlink(FEED_PIPE);
         exit(EXIT_FAILURE);
@@ -267,12 +242,6 @@ int main(int argc, char *argv[]) {
     }
 
     read(feed_fd, &comunicacao, sizeof(Comunicacao));
-    
-    
-    /*
-        sendMsg(comunicacao);
-        comunicacao = receiveMsg(FEED_PIPE);
-    */
 
     if (strcmp(comunicacao.buffer, LOGIN_SUCCESS) != 0) { 
         printf(comunicacao.buffer);
@@ -292,10 +261,11 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    printf("cmd > ");
+    fflush(stdout);
+
     do {
-        sleep(1);
-        printf("cmd > ");
-        fflush(stdout);
+
 
         if (fgets(buffer, MAX_MSG_SIZE, stdin) == NULL) {
             printf(ERROR_READING_COMMAND);
@@ -307,15 +277,15 @@ int main(int argc, char *argv[]) {
         if (strcmp(buffer, EXIT) == 0) {
             strcpy(comunicacao.tipoPedido,"logout");
             write(manager_fd, &comunicacao, sizeof(Comunicacao));
-            //sendMsg(comunicacao);
+            system("clear");
+            printf(EXITING);
             break;
         }
 
         if (processCommand(buffer) == 1) {
             strcpy(comunicacao.tipoPedido,"linha_commands");
             strcpy(comunicacao.buffer, buffer);
-            write(manager_fd, &comunicacao, sizeof(Comunicacao));
-            //sendMsg(comunicacao);   
+            write(manager_fd, &comunicacao, sizeof(Comunicacao));  
         }
 
     } while (1);

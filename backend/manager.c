@@ -33,23 +33,6 @@ void sendMsg(Comunicacao comunicacao){
     close(feed_fd);
 }
 
-/*Comunicacao receiveMsg(){
-    int manager_fd;
-    Comunicacao comunicacao;
-    memset(&comunicacao, 0, sizeof(Comunicacao)); // Inicializa a estrutura
-
-    manager_fd = open(MANAGER_PIPE, O_RDONLY);
-    if (manager_fd == -1) {
-        perror(ERROR_OPENING_MANAGER_PIPE);
-        exit(EXIT_FAILURE);
-    }
-
-    read(manager_fd, &comunicacao, sizeof(Comunicacao));
-
-    close(manager_fd);
-    return comunicacao;
-}*/
-
 int countWords(char *buffer){
     int spaces = 0;
 
@@ -107,16 +90,17 @@ void writeMsg(Comunicacao comunicacao,TDATA *td){
     }else{ //mensagem persistente
 
     }
+
     sendMsg(comunicacao);
 }
 
 void listUsers(TDATA *td){
     if(td->n_users == 0){
-        printf("Nenhum user conectado ate ao momento.\n");
+        printf(NO_USERS_CONNECTED);
     }else{
-        printf("Users conectados:\n");
+        printf("Utilizadores conectados:\n");
         for(int i = 0; i < td->n_users; i++){
-            printf("- %s \n",td->user[i].nome);
+            printf("-> %s \n",td->user[i].nome);
         }
     }
 }
@@ -135,7 +119,7 @@ void removeUser(TDATA *td, char *buffer) {
                 strcpy(td->user[j].nome, td->user[j + 1].nome);
             }
             td->n_users--;
-            printf("User %s removido com sucesso.\n", username);
+            printf(USER_REMOVED_SUCCESS, username);
             sendMsg(comunicacao);
             break;
         }else{
@@ -147,7 +131,7 @@ void removeUser(TDATA *td, char *buffer) {
     }
 
     if (!user_found) {
-        printf("User %s não encontrado.\n", username);
+        printf(USER_NOT_FOUND, username);
     }
 
     
@@ -204,6 +188,11 @@ void processCommandAdm(char *buffer, TDATA *td){
         case 4:
             break;
         case 5:
+            break;
+        case 6:
+            printf(EXITING);
+            unlink(MANAGER_PIPE);
+            exit(EXIT_SUCCESS);
             break;
         default:
             
@@ -292,13 +281,9 @@ void *process_orders(void *ptdata) {
                     // helpUser();
                     break;
                 default:
-                    // sendMsg("Comando inválido\n");
+                    strcpy(comunicacao.buffer, INVALID_COMMAND);
+                    sendMsg(comunicacao);
                     continue;
-            }
-
-            if (strcmp(comunicacao.buffer, EXIT) == 0) {
-                printf("A terminar o manager\n");
-                break;
             }
 
         }
@@ -333,7 +318,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (mkfifo(MANAGER_PIPE, 0660) == -1) {
-        perror("Erro ao criar MANAGER_PIPE");
+        perror(ERROR_CREATING_MANAGER_PIPE);
         exit(EXIT_FAILURE);
     }
     
@@ -361,7 +346,8 @@ int main(int argc, char *argv[]) {
         }
 
         buffer[strlen(buffer) - 1] = '\0';
-
+        
+        system("clear");
         processCommandAdm(buffer, &td);
 
     } while (strcmp(buffer, CLOSE) != 0);

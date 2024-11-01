@@ -7,6 +7,7 @@ typedef struct
 {
     int n_users;
     int n_topics;
+    int manager_fd;
     Topic topic[20];
     User user[10];  
 } TDATA;

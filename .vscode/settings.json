@@ -67,6 +67,8 @@
     "exceptions.h": "c",
     "unistd.h": "c",
     "types.h": "c",
-    "pthread.h": "c"
+    "pthread.h": "c",
+    "comunicacao.h": "c",
+    "stdio.h": "c"
   }
 }

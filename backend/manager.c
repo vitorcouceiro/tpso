@@ -16,8 +16,53 @@
 #include "../backend/models/comunicacao.h"
 
 void cleanup(int signo){
+    printf(EXITING);
     unlink(MANAGER_PIPE);
     exit(EXIT_FAILURE);
+}
+
+void lockTopic(TDATA *td, char *topic) {
+    int index = -1;
+
+    for (int i = 0; i < td->n_topics; i++) {
+        if (strcmp(td->topic[i].nome, topic) == 0) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+        printf(TOPIC_NOT_FOUND, topic);
+    } else {
+        if (td->topic[index].isLocked == 1) {
+            printf(TOPIC_ALREADY_LOCKED, topic);
+        } else {
+            td->topic[index].isLocked = 0;
+            printf(TOPIC_LOCKED_SUCCESS, topic);
+        }
+    }
+}
+
+void unlockTopic(TDATA *td, char *topic) {
+    int index = -1;
+
+    for (int i = 0; i < td->n_topics; i++) {
+        if (strcmp(td->topic[i].nome, topic) == 0) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+        printf(TOPIC_NOT_FOUND, topic);
+    } else {
+        if (td->topic[index].isLocked == 0) {
+            printf(TOPIC_ALREADY_UNLOCKED, topic);
+        } else {
+            td->topic[index].isLocked = 1;
+            printf(TOPIC_UNLOCKED_SUCCESS, topic);
+        }
+    }
 }
 
 void sendMsg(Comunicacao comunicacao){
@@ -32,6 +77,38 @@ void sendMsg(Comunicacao comunicacao){
     write(feed_fd, &comunicacao, sizeof(Comunicacao));
     close(feed_fd);
 }
+ 
+void showPerMsg(TDATA *td, char *topic) {
+    int index = -1;
+
+    for (int i = 0; i < td->n_topics; i++) {
+        if (strcmp(td->topic[i].nome, topic) == 0) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+        printf(TOPIC_NOT_FOUND, topic);
+    } else {
+        for (int i = 0; i < td->topic[index].n_persistentes; i++) {
+            printf("Mensagem %d: %s\n", i + 1, td->topic[index].persistente[i].msg);
+        }
+    }
+}
+
+
+void showTopics(TDATA *td){
+    if (td->n_topics == 0) {
+        printf(NO_TOPICS);
+    } else {
+        for (int i = 0; i < td->n_topics; i++) {
+            printf("Topic: %s\n", td->topic[i].nome );
+            printf("Numero de mensagens persistentes: %d\n",td->topic[i].persistente);
+            printf("\n");
+        }
+    }
+}
 
 int countWords(char *buffer){
     int spaces = 0;
@@ -45,7 +122,7 @@ int countWords(char *buffer){
     return spaces + 1;
 }
 
-void showTopics(Comunicacao comunicacao,TDATA *td) {
+void sendTopics(Comunicacao comunicacao,TDATA *td) {
     comunicacao.n_topics = td->n_topics;
     for(int i = 0; i < td->n_topics;i++){
         strcpy(comunicacao.topic[i].nome,td->topic[i].nome);
@@ -71,6 +148,7 @@ void writeMsg(Comunicacao comunicacao,TDATA *td){
         }
     }
 
+    // se o topico nao existir
     if(index == -1){
         if(td->n_topics >= MAX_TOPICS){
             strcpy(comunicacao.buffer,"Maximo de topicos atingido\n");
@@ -82,18 +160,27 @@ void writeMsg(Comunicacao comunicacao,TDATA *td){
             strcpy(td->topic[td->n_topics].estado,"desbloqueado");
             td->n_topics ++;
          }
+    }else{
+        if(duration == 0){// mensagem nao persistente
+
+        }else{ //mensagem persistente
+
+        }
+
     }
 
 
-    if(duration == 0){// mensagem nao persistente
-
-    }else{ //mensagem persistente
-
-    }
 
     sendMsg(comunicacao);
 }
 
+void broadcastMsg(TDATA *td, Comunicacao comunicacao) {
+    for (int i = 0; i < td->n_users; i++) {
+        strcpy(comunicacao.user.FEED_PIPE, td->user[i].FEED_PIPE);
+        sendMsg(comunicacao);
+    }
+}
+    
 void listUsers(TDATA *td){
     if(td->n_users == 0){
         printf(NO_USERS_CONNECTED);
@@ -121,20 +208,17 @@ void removeUser(TDATA *td, char *buffer) {
             td->n_users--;
             printf(USER_REMOVED_SUCCESS, username);
             sendMsg(comunicacao);
-            break;
-        }else{
-            strcpy(comunicacao.user.FEED_PIPE,td->user[i].FEED_PIPE);
+
             strcpy(comunicacao.tipoInformacao,EXIT_INFO);
             strcpy(comunicacao.buffer,td->user[i].nome);
-            sendMsg(comunicacao);
+            broadcastMsg(td,comunicacao);
+            break;
         }
     }
 
     if (!user_found) {
         printf(USER_NOT_FOUND, username);
     }
-
-    
 
 }
 
@@ -182,20 +266,51 @@ void processCommandAdm(char *buffer, TDATA *td){
             }
             break;
         case 2:
+            if(n_topics == 1){
+                showTopics(td);
+            }else{
+                printf(SYNTAX_ERROR_TOPICS);
+                return;
+            }
             break;
         case 3:
+            if(n_topics == 2){
+                char *topic = strtok(NULL, SPACE);
+                showPerMsg(td,topic);
+            }else{
+                printf(SYNTAX_ERROR_SHOW);
+                return;
+            }
             break;
         case 4:
+            if(n_topics == 2){
+                char *topic = strtok(NULL, SPACE);
+                lockTopic(td,topic);
+            }else{
+                printf(SYNTAX_ERROR_LOCK);
+                return;
+            }
             break;
         case 5:
+            if(n_topics == 2){
+                char *topic = strtok(NULL, SPACE);
+                unlockTopic(td,topic);
+            }else{
+                printf(SYNTAX_ERROR_UNLOCK);
+                return;
+            }
             break;
         case 6:
-            printf(EXITING);
-            unlink(MANAGER_PIPE);
-            exit(EXIT_SUCCESS);
+            if(n_topics == 1){
+                printf(EXITING);
+                unlink(MANAGER_PIPE);
+                exit(EXIT_SUCCESS);
+            }else{
+                printf(SYNTAX_ERROR_CLOSE);
+                return;
+            }
             break;
         default:
-            
             break;
     }
 }
@@ -266,7 +381,7 @@ void *process_orders(void *ptdata) {
 
             switch (index) {
                 case 0: // TOPICS
-                    showTopics(comunicacao, td);
+                    sendTopics(comunicacao, td);
                     break;
                 case 1: // MSG
                     writeMsg(comunicacao, td);
@@ -350,8 +465,8 @@ int main(int argc, char *argv[]) {
         system("clear");
         processCommandAdm(buffer, &td);
 
-    } while (strcmp(buffer, CLOSE) != 0);
-
+    } while (1);
+    
     unlink(MANAGER_PIPE);
     return 0;
 }

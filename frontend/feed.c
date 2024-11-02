@@ -190,7 +190,8 @@ int main(int argc, char *argv[]) {
     TFEED td;
     
     system("clear"); 
-
+    sleep(1);
+    
     if (argc != 2) {
         printf(INVALID_ARGS_FEED);
         exit(EXIT_FAILURE);

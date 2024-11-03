@@ -9,7 +9,7 @@ typedef struct
     int n_persistentes;
     char estado[20];
     Msg persistente[5];
-    Msg n_persiste;
+    int isLocked;
 } Topic;
 
 #endif // TOPIC_H

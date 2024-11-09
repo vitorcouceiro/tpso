@@ -1,3 +1,7 @@
+#include "monitor_server_thread.h"
+#include "../../utils/includes.h"
+#include "../../utils/globals.h"
+
 void *monitorServer(void *arg){
     char *FEED_PIPE = (char *)arg;
     while(1){
@@ -9,5 +13,4 @@ void *monitorServer(void *arg){
         }
         sleep(1);
     }
-    return NULL;
 }

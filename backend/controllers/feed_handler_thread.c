@@ -1,6 +1,12 @@
-#include "../communication/unicast_communication.c"
-#include "../service/msg_service.c"
-#include "../service/topic_service.c"
+#include "feed_handler_thread.h"
+#include "../../utils/includes.h"
+#include "../manager.h"
+#include "../models/comunicacao.h"
+#include "../communication/unicast_communication.h"
+#include "../service/msg_service.h"
+#include "../service/topic_service.h"
+#include "../../utils/globals.h"
+#include "../communication/broadcast_communication.h"
 
 void *feedHandlerThread(void *ptdata) {
     int index = -1;

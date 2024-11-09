@@ -2,8 +2,8 @@
 #define EXIT "exit"
 #define TOPICS "topics"
 #define MSG "msg"
-#define SUBCRIBE "subcribe"
-#define UNSUBCRIBE "unsubcribe"
+#define SUBSCRIBE "subscribe"
+#define UNSUBSCRIBE "unsubscribe"
 
 //Commands Admin
 #define USERS "users"

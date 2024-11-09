@@ -46,3 +46,5 @@
 #define SYNTAX_ERROR_CLOSE ERRO_HEADER " Erro de sintaxe. Sintaxe: close\n"
 #define TOPIC_ALREADY_LOCKED ERRO_HEADER " O topico %s ja se encontra bloqueado.\n"
 #define TOPIC_ALREADY_UNLOCKED ERRO_HEADER " O topico %s ja se encontra desbloqueado.\n"
+#define SYNTAX_ERROR_CLEAR ERRO_HEADER " Erro de sintaxe. Sintaxe: clear\n"
+#define DURATION_ERROR ERRO_HEADER " A duracao tem de ser um numero inteiro.\n"

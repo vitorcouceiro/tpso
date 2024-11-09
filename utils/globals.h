@@ -1,21 +1,19 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
-#include "commands.h"
 
-//Globals
 #define MAX_MSG_SIZE 300
 #define MAX_USERS 10
 #define MAX_TOPICS 20
-#define N_COMMANDS_USER 4
-#define N_COMMANDS_ADM 7
+#define MAX_PERSISTENT_MSG 5
+#define N_COMMANDS_USER 5
+#define N_COMMANDS_ADM 8
 
 #define SPACE " "
 
-char *COMMANDS_USER[]={TOPICS,MSG,SUBCRIBE,UNSUBCRIBE}; 
-char *COMMANDS_ADM[]={USERS,REMOVE,TOPICS,SHOW,LOCK,UNLOCK,CLOSE};
-int CONNECTED_USERS = 0;
+extern char *COMMANDS_USER[];
+extern char *COMMANDS_ADM[];
+extern int CONNECTED_USERS;
 
-//Const pipes
 #define MANAGER_PIPE "../tmp/manager_pipe"
 
-#endif // GLOBALS_H
+#endif

@@ -1,3 +1,6 @@
+#include "list_users_display.h"
+#include "../../utils/includes.h"
+
 void displayListUsers(TDATA *td){
     if(td->n_users == 0){
         printf(NO_USERS_CONNECTED);

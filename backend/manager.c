@@ -1,5 +1,7 @@
-#include <fcntl.h>
 #include "manager.h"
+#include "../utils/includes.h"
+#include "view/manager_view.h"
+#include "../utils/globals.h"
 
 void cleanup(int signo){
     printf(EXITING);

@@ -136,6 +136,13 @@ void managerView(){
         exit(EXIT_FAILURE);
     }
 
+    if (access("../tmp", F_OK) != 0) {
+        if (mkdir("../tmp", 0770) == -1) {
+            perror("Error creating tmp directory");
+            exit(EXIT_FAILURE);
+        }
+    }
+
     if (mkfifo(MANAGER_PIPE, 0660) == -1) {
         perror(ERROR_CREATING_MANAGER_PIPE);
         exit(EXIT_FAILURE);

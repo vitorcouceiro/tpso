@@ -1,3 +1,6 @@
+#include "unicast_communication.h"
+#include "../../utils/includes.h"
+
 void unicastMsg(Comunicacao comunicacao){
     int feed_fd = open(comunicacao.user.FEED_PIPE, O_WRONLY);
 

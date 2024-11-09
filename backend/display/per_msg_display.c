@@ -1,3 +1,6 @@
+#include "per_msg_display.h"
+#include "../../utils/includes.h"
+
 void displayPerMsg(TDATA *td, char *topic) {
     int index = -1;
 

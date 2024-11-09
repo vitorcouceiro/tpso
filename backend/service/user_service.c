@@ -1,12 +1,18 @@
-#include "../communication/broadcast_communication.c"
+#include "user_service.h"
+#include "../../utils/includes.h"
+#include "../manager.h"
+#include "../models/comunicacao.h"
+#include "../communication/unicast_communication.h"
+#include "../communication/broadcast_communication.h"
+#include "../../utils/globals.h"
 
 void expelUser(TDATA *td, char *buffer) {
     char *username = strtok(NULL, SPACE);
     int user_found = 0;
-    Comunicacao comunicacao;
 
     for (int i = 0; i < td->n_users; i++) {
         if (strcmp(td->user[i].nome, username) == 0) {
+            Comunicacao comunicacao;
             user_found = 1;
             strcpy(comunicacao.user.FEED_PIPE,td->user[i].FEED_PIPE);
             strcpy(comunicacao.tipoInformacao,EXIT);

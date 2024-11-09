@@ -1,8 +1,12 @@
-#include "../display/topic_display.c"
-#include "../display/exit_info_display.c"
+#include "manager_handler_thread.h"
+#include "../../utils/includes.h"
+#include "../../backend/models/comunicacao.h"
+#include "../feed.h"
+#include "../display/exit_info_display.h"
+#include "../display/topic_display.h"
 
 void *managerHandlerThread(void *ptdata) {
-    TFEED *td = (TFEED *)ptdata;
+    const TFEED *td = (TFEED *)ptdata;
     Comunicacao comunicacao;
 
 
@@ -16,7 +20,7 @@ void *managerHandlerThread(void *ptdata) {
     while (1) {
         read(feed_fd, &comunicacao, sizeof(Comunicacao));
 
-        system("clear");
+        //system("clear");
 
         if (strcmp(comunicacao.tipoInformacao, TOPICS) == 0) {
             displayTopics(comunicacao);

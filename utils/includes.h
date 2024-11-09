@@ -11,6 +11,6 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include "../utils/exceptions.h"
-#include "../utils/globals.h"
+#include "../utils/commands.h"
 
 #endif //INCLUDES_H

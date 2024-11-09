@@ -1,9 +1,17 @@
+#include "topic_service.h"
+#include "../../utils/includes.h"
+#include "../models/comunicacao.h"
+#include "../manager.h"
+#include "../communication/unicast_communication.h"
+
+
 void sendTopics(Comunicacao comunicacao, const TDATA *td) {
     comunicacao.n_topics = td->n_topics;
     for (int i = 0; i < td->n_topics; i++) {
         strcpy(comunicacao.topic[i].nome, td->topic[i].nome);
         comunicacao.topic[i].n_persistentes = td->topic[i].n_persistentes;
-        strcpy(comunicacao.topic[i].estado, td->topic[i].estado);
+        //modificar de maneira a que so o user que bloqueou é que esteja bloqueado
+        //strcpy(comunicacao.topic[i].estado, td->topic[i].estado);
     }
     strcpy(comunicacao.tipoInformacao, TOPICS);
     unicastMsg(comunicacao);

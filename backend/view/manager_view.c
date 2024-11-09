@@ -1,14 +1,16 @@
+#include "manager_view.h"
+#include "../../utils/includes.h"
 #include "../manager.h"
-#include "../controllers/feed_handler_thread.c"
-#include "../display/topic_display.c"
-#include "../display/list_users_display.c"
-#include "../display/per_msg_display.c"
-#include "../service/user_service.c"
-#include "../service/topic_service.c"
+#include "../display/list_users_display.h"
+#include "../display/per_msg_display.h"
+#include "../display/topic_display.h"
+#include "../service/user_service.h"
+#include "../service/topic_service.h"
+#include "../controllers/feed_handler_thread.h"
+#include "../../utils/globals.h"
 
-int countWords(char *buffer){
+int countWords(const char *buffer){
     int spaces = 0;
-
     for(int i = 0; buffer[i] != '\0'; i++){
         if(buffer[i] == ' '){
             spaces++;
@@ -20,17 +22,15 @@ int countWords(char *buffer){
 
 void processCommandAdm(char *buffer, TDATA *td){
     int index = -1;
-    int n_topics;
-    char *command;
 
 
     if(buffer == NULL || strcmp(buffer, "") == 0){
         return;
     }
 
-    n_topics = countWords(buffer);
+    int n_topics = countWords(buffer);
 
-    command = strtok(buffer,SPACE);
+    char *command = strtok(buffer,SPACE);
 
     for(int i = 0; i < N_COMMANDS_ADM; i++){
         if(strcmp(command,COMMANDS_ADM[i]) == 0){
@@ -106,15 +106,21 @@ void processCommandAdm(char *buffer, TDATA *td){
                 return;
             }
             break;
+        case 7:
+            if(n_topics == 1){
+                system("clear");
+            }else{
+                printf(SYNTAX_ERROR_CLEAR);
+            }
+            break;
         default:
             break;
     }
 }
 
-int managerView(){
+void managerView(){
     pthread_t thread;
     char buffer[MAX_MSG_SIZE];
-    char *command;
 
     TDATA td;
     td.n_topics = 0;
@@ -142,7 +148,7 @@ int managerView(){
 
     if (pthread_create(&thread, NULL, feedHandlerThread, (void*)&td) != 0) {
         perror(ERROR_CREATING_THREAD);
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     do {
@@ -165,6 +171,4 @@ int managerView(){
 
     } while (1);
 
-    unlink(MANAGER_PIPE);
-    return 0;
 }

@@ -1,9 +1,12 @@
-#include "../controllers/manager_handler_thread.c"
-#include "../controllers/monitor_server_thread.c"
+#include "feed_view.h"
+#include "../../utils/includes.h"
+#include "../../backend/models/comunicacao.h"
+#include "../feed.h"
+#include "../controllers/manager_handler_thread.h"
+#include "../../utils/globals.h"
 
-int countWords(const char *buffer){
+int countWords(char *buffer){
     int spaces = 0;
-
     for(int i = 0; buffer[i] != '\0'; i++){
         if(buffer[i] == ' '){
             spaces++;
@@ -23,10 +26,8 @@ int processCommand (const char *buffer){
     char buffer_copy[MAX_MSG_SIZE];
     strcpy(buffer_copy, buffer);
 
-
-    char *command = strtok(buffer_copy, SPACE);
-
     int n_topics = countWords(buffer_copy);
+    char *command = strtok(buffer_copy, SPACE);
 
     for(int i = 0; i < N_COMMANDS_USER; i++){
         if(strcmp(command, COMMANDS_USER[i]) == 0){
@@ -51,8 +52,8 @@ int processCommand (const char *buffer){
             }
         case 1: // MSG
             if(n_topics >= 4){
-                char *topic = strtok(NULL, SPACE);
-                char *duration = strtok(NULL, SPACE);
+                const char *topic = strtok(NULL, SPACE);
+                strtok(NULL, SPACE); // skip duration
                 char *message = strtok(NULL, "");
 
                 if (strlen(topic) > 20) {
@@ -64,7 +65,6 @@ int processCommand (const char *buffer){
                     printf(MESSAGE_LENGTH_ERROR);
                     return 0;
                 }
-
                 return 1;
             }else{
                 printf(SYNTAX_ERROR_MSG);
@@ -98,6 +98,14 @@ int processCommand (const char *buffer){
                 printf(SYNTAX_ERROR_UNSUBSCRIBE);
                 return 0;
             }
+        case 4: // CLEAR
+            if(n_topics == 1){
+                system("clear");
+                return 1;
+            }else{
+                printf(SYNTAX_ERROR_CLEAR);
+                return 0;
+            }
         default:
             return 0;
     }
@@ -110,7 +118,7 @@ void feedView(const char *nome) {
     Comunicacao comunicacao;
     TFEED td;
 
-    system("clear");
+    //system("clear");
     sleep(1);
 
     if (access(MANAGER_PIPE, F_OK) != 0) {

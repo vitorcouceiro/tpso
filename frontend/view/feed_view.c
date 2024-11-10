@@ -16,11 +16,11 @@ int countWords(char *buffer){
     return spaces + 1;
 }
 
-int processCommand (const char *buffer){
+void processCommand (const char *buffer, TFEED td){
     int index = -1;
 
     if(strcmp(buffer,"") == 0){
-        return 0;
+        return;
     }
 
     char buffer_copy[MAX_MSG_SIZE];
@@ -38,37 +38,60 @@ int processCommand (const char *buffer){
 
     if (index == -1) {
         printf(INVALID_COMMAND);
-        return 0;
+        return ;
     }
 
     switch (index)
     {
         case 0: // TOPICS
             if(n_topics == 1){
-                return 1;
+                RequestTopicsManager requestTopicsManager;
+                requestTopicsManager.type = TOPICS;
+                strcpy(requestTopicsManager.base.userName, td.UserName);
+                strcpy(requestTopicsManager.base.FEED_PIPE, td.FEED_PIPE);
+                write(td.manager_fd , &requestTopicsManager.type, sizeof(RequestType));
+                write(td.manager_fd, &requestTopicsManager, sizeof(RequestTopicsManager));
+                return ;
             }else{
                 printf(SYNTAX_ERROR_TOPICS);
-                return 0;
+                return ;
             }
         case 1: // MSG
             if(n_topics >= 4){
                 const char *topic = strtok(NULL, SPACE);
-                strtok(NULL, SPACE); // skip duration
+                char *duration_str = strtok(NULL, SPACE); // get duration
                 char *message = strtok(NULL, "");
 
                 if (strlen(topic) > 20) {
                     printf(TOPIC_LENGTH_ERROR);
-                    return 0;
+                    return;
                 }
 
                 if (strlen(message) > 300) {
                     printf(MESSAGE_LENGTH_ERROR);
-                    return 0;
+                    return;
                 }
-                return 1;
-            }else{
+
+                if (duration_str == NULL) {
+                    printf("ERROIUUUUUU");
+                    return;
+                }
+
+                RequestMsgManager requestMsgManager;
+                requestMsgManager.type = MSG;
+                strcpy(requestMsgManager.topicName, topic);
+                requestMsgManager.duration = atoi(duration_str);
+
+                strcpy(requestMsgManager.message, message);
+                strcpy(requestMsgManager.base.userName, td.UserName);
+                strcpy(requestMsgManager.base.FEED_PIPE, td.FEED_PIPE);
+                write(td.manager_fd, &requestMsgManager.type, sizeof(RequestType));
+                write(td.manager_fd, &requestMsgManager, sizeof(RequestMsgManager));
+
+                return;
+            } else {
                 printf(SYNTAX_ERROR_MSG);
-                return 0;
+                return;
             }
         case 2: // SUBSCRIBE
             if(n_topics == 2){
@@ -76,13 +99,20 @@ int processCommand (const char *buffer){
 
                 if (strlen(topic) > 20) {
                     printf(TOPIC_LENGTH_ERROR);
-                    return 0;
+                    return ;
                 }
 
-                return 1;
+                RequestSubscribeUnsubscribeManager requestSubscribe;
+                requestSubscribe.type = SUBSCRIBE;
+                strcpy(requestSubscribe.topicName, topic);
+                strcpy(requestSubscribe.base.userName, td.UserName);
+                strcpy(requestSubscribe.base.FEED_PIPE, td.FEED_PIPE);
+                write(td.manager_fd, &requestSubscribe, sizeof(RequestSubscribeUnsubscribeManager));
+
+                return ;
             }else{
                 printf(SYNTAX_ERROR_SUBSCRIBE);
-                return 0;
+                return ;
             }
         case 3: // UNSUBSCRIBE
             if(n_topics == 2){
@@ -90,24 +120,32 @@ int processCommand (const char *buffer){
 
                 if (strlen(topic) > 20) {
                     printf(TOPIC_LENGTH_ERROR);
-                    return 0;
+                    return ;
                 }
 
-                return 1;
+                RequestSubscribeUnsubscribeManager requestUnsubscribe;
+                requestUnsubscribe.type = UNSUBSCRIBE;
+                strcpy(requestUnsubscribe.topicName, topic);
+                strcpy(requestUnsubscribe.base.userName, td.UserName);
+                strcpy(requestUnsubscribe.base.FEED_PIPE, td.FEED_PIPE);
+                write(td.manager_fd, &requestUnsubscribe, sizeof(RequestSubscribeUnsubscribeManager));
+
+                return ;
             }else{
                 printf(SYNTAX_ERROR_UNSUBSCRIBE);
-                return 0;
+                return ;
             }
         case 4: // CLEAR
             if(n_topics == 1){
                 system("clear");
-                return 1;
+                printf("cmd > ");
+                return ;
             }else{
                 printf(SYNTAX_ERROR_CLEAR);
-                return 0;
+                return ;
             }
         default:
-            return 0;
+            return ;
     }
 }
 
@@ -115,7 +153,7 @@ void feedView(const char *nome) {
     char buffer[MAX_MSG_SIZE];
     char FEED_PIPE[256];
     pthread_t monitor_thread, response_thread;
-    Comunicacao comunicacao;
+    RequestAuthManager requestAuthManager;
     TFEED td;
 
     //system("clear");
@@ -128,17 +166,18 @@ void feedView(const char *nome) {
 
     snprintf(FEED_PIPE, sizeof(FEED_PIPE), "../tmp/pipe_%d", getpid());
     strcpy(td.FEED_PIPE, FEED_PIPE);
+    strcpy(td.UserName, nome);
 
     if(mkfifo(FEED_PIPE, 0660)==-1){
         perror(ERROR_CREATING_FEED_PIPE);
         exit(EXIT_FAILURE);
     }
 
-    strcpy(comunicacao.user.FEED_PIPE, FEED_PIPE);
 
 
-    int manager_fd = open(MANAGER_PIPE, O_WRONLY);
-    if (manager_fd == -1) {
+
+    td.manager_fd = open(MANAGER_PIPE, O_WRONLY);
+    if (td.manager_fd  == -1) {
         perror(ERROR_OPENING_MANAGER_PIPE);
         unlink(FEED_PIPE);
         exit(EXIT_FAILURE);
@@ -151,12 +190,13 @@ void feedView(const char *nome) {
         exit(EXIT_FAILURE);
     }
 
-    strcpy(comunicacao.tipoPedido, "linha_commands");
+    requestAuthManager.type = LOGIN;
+    strcpy(requestAuthManager.base.FEED_PIPE, td.FEED_PIPE);
+    strcpy(requestAuthManager.base.userName, td.UserName);
 
-    strcpy(comunicacao.user.nome, nome);
-    strcpy(comunicacao.tipoPedido, "login");
-
-    write(manager_fd, &comunicacao, sizeof(Comunicacao));
+    write(td.manager_fd, &requestAuthManager.type, sizeof(RequestType));
+    write(td.manager_fd, &requestAuthManager, sizeof(RequestAuthManager));
+    printf("%s\n", requestAuthManager.base.FEED_PIPE);
 
     int feed_fd = open(FEED_PIPE, O_RDONLY);
     if (feed_fd == -1) {
@@ -165,17 +205,19 @@ void feedView(const char *nome) {
         exit(EXIT_FAILURE);
     }
 
-    read(feed_fd, &comunicacao, sizeof(Comunicacao));
+    ResponseType responseType;
+    ResponseInfoError response_info_error;
+    read(feed_fd, &responseType, sizeof(ResponseType));
+    read(feed_fd, &response_info_error, sizeof(ResponseInfoError));
 
-    if (strcmp(comunicacao.buffer, LOGIN_SUCCESS) != 0) {
-        printf(comunicacao.buffer);
+    if(responseType != LOGIN_SUCCESS){
+        printf(response_info_error.buffer);
         close(feed_fd);
         unlink(FEED_PIPE);
         exit(EXIT_FAILURE);
     }
 
-    printf(comunicacao.buffer);
-
+    printf(response_info_error.buffer);
 
     close(feed_fd);
 
@@ -198,23 +240,22 @@ void feedView(const char *nome) {
 
         buffer[strlen(buffer) - 1] = '\0';
 
-        if (strcmp(buffer, EXIT) == 0) {
-            strcpy(comunicacao.tipoPedido,"logout");
-            write(manager_fd, &comunicacao, sizeof(Comunicacao));
+        if (strcmp(buffer, "exit") == 0) {
+            requestAuthManager.type = LOGOUT;
+            strcpy(requestAuthManager.base.FEED_PIPE, td.FEED_PIPE);
+            strcpy(requestAuthManager.base.userName, td.UserName);
+            write (td.manager_fd , &requestAuthManager.type, sizeof(RequestType));
+            write(td.manager_fd , &requestAuthManager, sizeof(RequestAuthManager));
             system("clear");
             printf(EXITING);
             break;
         }
 
-        if (processCommand(buffer) == 1) {
-            strcpy(comunicacao.tipoPedido,"linha_commands");
-            strcpy(comunicacao.buffer, buffer);
-            write(manager_fd, &comunicacao, sizeof(Comunicacao));
-        }
+        processCommand(buffer,td);
 
     } while (1);
 
 
-    close(manager_fd);
+    close(td.manager_fd);
     unlink(FEED_PIPE);
 }

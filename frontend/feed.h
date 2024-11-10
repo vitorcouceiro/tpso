@@ -7,6 +7,7 @@ typedef struct
     int feed_fd;
     int manager_fd;
     char FEED_PIPE[256];
+    char UserName[20];
 } TFEED;
 
 

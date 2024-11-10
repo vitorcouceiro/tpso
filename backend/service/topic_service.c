@@ -4,17 +4,21 @@
 #include "../manager.h"
 #include "../communication/unicast_communication.h"
 
+void sendTopics(int manager_fd, TDATA *td) {
+    ResponseListTopics responseListTopics;
 
-void sendTopics(Comunicacao comunicacao, const TDATA *td) {
-    comunicacao.n_topics = td->n_topics;
+    RequestTopicsManager request;
+    read(manager_fd, &request, sizeof(RequestTopicsManager));
+    strcpy(responseListTopics.base.FEED_PIPE, request.base.FEED_PIPE);
+
+    responseListTopics.n_topics = td->n_topics;
     for (int i = 0; i < td->n_topics; i++) {
-        strcpy(comunicacao.topic[i].nome, td->topic[i].nome);
-        comunicacao.topic[i].n_persistentes = td->topic[i].n_persistentes;
-        //modificar de maneira a que so o user que bloqueou é que esteja bloqueado
-        //strcpy(comunicacao.topic[i].estado, td->topic[i].estado);
+        strcpy(responseListTopics.topic[i].nome, td->topic[i].nome);
+        responseListTopics.topic[i].n_persistentes = td->topic[i].n_persistentes;
+        responseListTopics.topic[i].isLocked = td->topic[i].isLocked;
     }
-    strcpy(comunicacao.tipoInformacao, TOPICS);
-    unicastMsg(comunicacao);
+    responseListTopics.type = LIST_TOPICS;
+    unicastListTopics(responseListTopics);
 }
 
 void lockTopic(TDATA *td, char *topic) {

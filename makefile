@@ -3,8 +3,8 @@ all: manager feed
 manager: backend/manager.o backend/communication/broadcast_communication.o backend/communication/unicast_communication.o backend/controllers/feed_handler_thread.o backend/display/list_users_display.o backend/display/per_msg_display.o backend/display/topic_display.o backend/service/msg_service.o backend/service/user_service.o backend/service/topic_service.o backend/view/manager_view.o utils/globals.o
 	gcc -o backend/manager backend/manager.o backend/communication/broadcast_communication.o backend/communication/unicast_communication.o backend/controllers/feed_handler_thread.o backend/display/list_users_display.o backend/display/per_msg_display.o backend/display/topic_display.o backend/service/msg_service.o backend/service/user_service.o backend/service/topic_service.o backend/view/manager_view.o utils/globals.o
 
-feed: frontend/feed.o frontend/view/feed_view.o frontend/controllers/manager_handler_thread.o frontend/controllers/monitor_server_thread.o frontend/display/exit_info_display.o frontend/display/msg_no_persistent_display.o frontend/display/topic_display.o utils/globals.o
-	gcc -o frontend/feed frontend/feed.o frontend/view/feed_view.o frontend/controllers/manager_handler_thread.o frontend/controllers/monitor_server_thread.o frontend/display/exit_info_display.o frontend/display/msg_no_persistent_display.o frontend/display/topic_display.o utils/globals.o
+feed: frontend/feed.o frontend/view/feed_view.o frontend/controllers/manager_handler_thread.o frontend/controllers/monitor_server_thread.o frontend/display/msg_no_persistent_display.o frontend/display/topic_display.o utils/globals.o
+	gcc -o frontend/feed frontend/feed.o frontend/view/feed_view.o frontend/controllers/manager_handler_thread.o frontend/controllers/monitor_server_thread.o frontend/display/msg_no_persistent_display.o frontend/display/topic_display.o utils/globals.o
 
 utils/globals.o: utils/globals.c utils/globals.h
 	gcc -c utils/globals.c -o utils/globals.o
@@ -20,9 +20,6 @@ frontend/controllers/manager_handler_thread.o: frontend/controllers/manager_hand
 
 frontend/controllers/monitor_server_thread.o: frontend/controllers/monitor_server_thread.c frontend/controllers/monitor_server_thread.h
 	gcc -c frontend/controllers/monitor_server_thread.c -o frontend/controllers/monitor_server_thread.o
-
-frontend/display/exit_info_display.o: frontend/display/exit_info_display.c frontend/display/exit_info_display.h
-	gcc -c frontend/display/exit_info_display.c -o frontend/display/exit_info_display.o
 
 frontend/display/msg_no_persistent_display.o: frontend/display/msg_no_persistent_display.c frontend/display/msg_no_persistent_display.h
 	gcc -c frontend/display/msg_no_persistent_display.c -o frontend/display/msg_no_persistent_display.o

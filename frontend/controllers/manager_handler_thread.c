@@ -47,6 +47,13 @@ void *managerHandlerThread(void *ptdata) {
                     printf("\n%s", response.buffer);
                 }
                 break;
+            case MSG_NOTIFICATION:
+                {
+                    ResponseMsg response;
+                    read(feed_fd, &response, sizeof(ResponseMsg));
+                    printf("\n[MSG] %s\n", response.message);
+                }
+                break;
             default:
                 break;
 

@@ -16,6 +16,7 @@
 #define TOPIC_LOCKED_SUCCESS INFO_HEADER " O topico %s foi bloqueado com sucesso.\n"
 #define TOPIC_UNLOCKED_SUCCESS INFO_HEADER " O topico %s foi desbloqueado com sucesso.\n"
 #define MAX_TOPICS_REACHED ERRO_HEADER " Numero maximo de topicos atingido.\n"
+#define MSG_SENT INFO_HEADER " Mensagem enviada com sucesso.\n"
 // Error
 #define INVALID_ARGS_FEED ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./feed <nome>\n" 
 #define INVALID_ARGS_MANA ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./manager\n" 

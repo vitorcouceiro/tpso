@@ -35,7 +35,14 @@ void createMsg(int manager_fd, TDATA *td) {
             responseMsg.type = MSG_NOTIFICATION;
             strcpy(responseMsg.topicName, request.topicName);
             strcpy(responseMsg.message, request.message);
+            strcpy(responseMsg.base.userName, request.base.userName);
+            strcpy(responseMsg.base.FEED_PIPE, request.base.FEED_PIPE);
             broadcastMsg(td, responseMsg);
+
+            responseInfoError.type = MSG_CONFIRMATION;
+            strcpy( responseInfoError.base.FEED_PIPE, request.base.FEED_PIPE);
+            strcpy( responseInfoError.buffer, MSG_SENT);
+            unicastInfoError(responseInfoError);
         }else {
 
         }

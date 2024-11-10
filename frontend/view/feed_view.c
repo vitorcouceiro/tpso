@@ -73,7 +73,6 @@ void processCommand (const char *buffer, TFEED td){
                 }
 
                 if (duration_str == NULL) {
-                    printf("ERROIUUUUUU");
                     return;
                 }
 

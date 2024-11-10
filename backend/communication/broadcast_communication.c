@@ -26,8 +26,13 @@ void broadcastUserExpelled(const TDATA *td,ResponseInfoError responseInfoError) 
 
 
 void broadcastMsg(const TDATA *td, ResponseMsg responseMsg) {
+    char feed_pipe [256];
+    strcpy(feed_pipe, responseMsg.base.FEED_PIPE);
+
     for (int i = 0; i < td->n_users; i++) {
-        strcpy(responseMsg.base.FEED_PIPE, td->user[i].FEED_PIPE);
-        unicastMsg(responseMsg);
+        if(strcmp(feed_pipe, td->user[i].FEED_PIPE) != 0) {
+            strcpy(responseMsg.base.FEED_PIPE, td->user[i].FEED_PIPE);
+            unicastMsg(responseMsg);
+        }
     }
 }

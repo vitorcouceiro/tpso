@@ -16,18 +16,23 @@ void expelUser(TDATA *td, char *buffer) {
             user_found = 1;
             strcpy(responseInfoError.base.FEED_PIPE,td->user[i].FEED_PIPE);
 
+
             for (int j = i; j < td->n_users - 1; j++) {
                 strcpy(td->user[j].nome, td->user[j + 1].nome);
+                strcpy(td->user[j].FEED_PIPE, td->user[j + 1].FEED_PIPE);
             }
+
             td->n_users--;
 
             strcpy(responseInfoError.buffer,USER_REMOVED);
             responseInfoError.type = USER_EXPELLED;
             unicastInfoError(responseInfoError);
 
-            snprintf(responseInfoError.buffer, sizeof(responseInfoError.buffer), USER_REMOVED_SPECIFIC, username);
-            responseInfoError.type = USER_EXPELLED_NOTIFICATION;
-            broadcastUserExpelled(td,responseInfoError);
+            if(td->n_users != 0){
+                snprintf(responseInfoError.buffer, sizeof(responseInfoError.buffer), USER_REMOVED_SPECIFIC, username);
+                responseInfoError.type = USER_EXPELLED_NOTIFICATION;
+                broadcastUserExpelled(td,responseInfoError);
+            }
 
             printf(USER_REMOVED_SUCCESS, username);
             break;

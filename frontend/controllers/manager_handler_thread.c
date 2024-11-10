@@ -34,14 +34,15 @@ void *managerHandlerThread(void *ptdata) {
                 {
                     ResponseInfoError response;
                     read(feed_fd, &response, sizeof(ResponseInfoError));
-                    printf("%s\n", response.buffer);
+                    printf("\n%s", response.buffer);
                     exit(EXIT_FAILURE);
                 }
+                break;
             case USER_EXPELLED_NOTIFICATION:
                 {
                     ResponseInfoError response;
                     read(feed_fd, &response, sizeof(ResponseInfoError));
-                    printf("%s\n", response.buffer);
+                    printf("\n%s", response.buffer);
                 }
                 break;
             default:

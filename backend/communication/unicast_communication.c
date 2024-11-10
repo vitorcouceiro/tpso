@@ -26,3 +26,16 @@ void unicastListTopics(ResponseListTopics responseListTopics) {
     write(feed_fd, &responseListTopics, sizeof(ResponseListTopics));
     close(feed_fd);
 }
+
+void unicastMsg(ResponseMsg responseMsg) {
+    int feed_fd = open(responseMsg.base.FEED_PIPE, O_WRONLY);
+
+    if (feed_fd == -1) {
+        perror(ERROR_OPENING_FEED_PIPE);
+        exit(EXIT_FAILURE);
+    }
+
+    write(feed_fd, &responseMsg.type, sizeof(ResponseType));
+    write(feed_fd, &responseMsg, sizeof(ResponseMsg));
+    close(feed_fd);
+}

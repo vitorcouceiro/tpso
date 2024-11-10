@@ -4,40 +4,51 @@
 #include "../communication/broadcast_communication.h"
 #include "../../utils/globals.h"
 
-/*
-void createMsg(Comunicacao comunicacao,TDATA *td){
+void createMsg(int manager_fd, TDATA *td) {
+
+    RequestMsgManager request;
+    read(manager_fd, &request, sizeof(RequestMsgManager));
+
+    ResponseInfoError responseInfoError;
+    strcpy(responseInfoError.base.FEED_PIPE, request.base.FEED_PIPE);
+
+    ResponseMsg responseMsg;// isto esta mal
+    strcpy(responseMsg.base.FEED_PIPE, request.base.FEED_PIPE);
+
     int index = -1;
-    long time = 0;
-
-    strtok(comunicacao.buffer, SPACE);
-
-    char *topic = strtok(NULL, SPACE);
-    if(topic == NULL){
-        strcpy(comunicacao.buffer,SYNTAX_ERROR_MSG);
-        unicastMsg(comunicacao);
-        return;
-    }
-
-    char *duration = strtok(NULL, SPACE);
-    if(duration == NULL){
-        strcpy(comunicacao.buffer,SYNTAX_ERROR_MSG);
-        unicastMsg(comunicacao);
-        return;
-    }
-
-    char *message = strtok(NULL, "");
-    if(message == NULL){
-        strcpy(comunicacao.buffer,SYNTAX_ERROR_MSG);
-        unicastMsg(comunicacao);
-        return;
-    }
-
     for(int i = 0; i < td->n_topics;i++){
-        if(strcmp(topic, td->topic[i].nome) == 0){
+        if(strcmp(request.topicName, td->topic[i].nome) == 0){
             index = i;
             break;
         }
     }
+
+    if(index == -1) { // se o topico nao existir
+        if(td->n_topics >= MAX_TOPICS){
+            responseInfoError.type = MSG_ERROR;
+            strcpy(responseInfoError.buffer, MAX_TOPICS_REACHED);
+            unicastInfoError(responseInfoError);
+            return;
+        }
+
+        if(request.duration == 0) {
+            responseMsg.type = MSG_NOTIFICATION;
+            strcpy(responseMsg.topicName, request.topicName);
+            strcpy(responseMsg.message, request.message);
+            broadcastMsg(td, responseMsg);
+        }else {
+
+        }
+
+    }else {
+
+    }
+
+
+}
+/*
+void createMsg(Comunicacao comunicacao,TDATA *td){
+
 
     // se o topico nao existir
     if(index == -1){

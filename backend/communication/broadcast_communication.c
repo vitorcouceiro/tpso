@@ -23,3 +23,11 @@ void broadcastUserExpelled(const TDATA *td,ResponseInfoError responseInfoError) 
         unicastInfoError(responseInfoError);
     }
 }
+
+
+void broadcastMsg(const TDATA *td, ResponseMsg responseMsg) {
+    for (int i = 0; i < td->n_users; i++) {
+        strcpy(responseMsg.base.FEED_PIPE, td->user[i].FEED_PIPE);
+        unicastMsg(responseMsg);
+    }
+}

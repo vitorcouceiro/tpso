@@ -39,6 +39,8 @@ void *managerHandlerThread(void *ptdata) {
                 }
                 break;
             case USER_EXPELLED_NOTIFICATION:
+            case MSG_ERROR:
+            case MSG_CONFIRMATION:
                 {
                     ResponseInfoError response;
                     read(feed_fd, &response, sizeof(ResponseInfoError));

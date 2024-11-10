@@ -59,32 +59,39 @@ void processCommand (const char *buffer, TFEED td){
         case 1: // MSG
             if(n_topics >= 4){
                 const char *topic = strtok(NULL, SPACE);
-                strtok(NULL, SPACE); // skip duration
+                char *duration_str = strtok(NULL, SPACE); // get duration
                 char *message = strtok(NULL, "");
 
                 if (strlen(topic) > 20) {
                     printf(TOPIC_LENGTH_ERROR);
-                    return ;
+                    return;
                 }
 
                 if (strlen(message) > 300) {
                     printf(MESSAGE_LENGTH_ERROR);
-                    return ;
+                    return;
+                }
+
+                if (duration_str == NULL) {
+                    printf("ERROIUUUUUU");
+                    return;
                 }
 
                 RequestMsgManager requestMsgManager;
                 requestMsgManager.type = MSG;
                 strcpy(requestMsgManager.topicName, topic);
-                requestMsgManager.duration = atoi(strtok(NULL, SPACE));
+                requestMsgManager.duration = atoi(duration_str);
+
                 strcpy(requestMsgManager.message, message);
                 strcpy(requestMsgManager.base.userName, td.UserName);
                 strcpy(requestMsgManager.base.FEED_PIPE, td.FEED_PIPE);
+                write(td.manager_fd, &requestMsgManager.type, sizeof(RequestType));
                 write(td.manager_fd, &requestMsgManager, sizeof(RequestMsgManager));
 
-                return ;
-            }else{
+                return;
+            } else {
                 printf(SYNTAX_ERROR_MSG);
-                return ;
+                return;
             }
         case 2: // SUBSCRIBE
             if(n_topics == 2){

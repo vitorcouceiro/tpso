@@ -2,15 +2,12 @@
 #include "../../utils/includes.h"
 #include "../manager.h"
 #include "../models/comunicacao.h"
-#include "../communication/unicast_communication.h"
 #include "../service/msg_service.h"
 #include "../service/topic_service.h"
 #include "../service/user_service.h"
 #include "../../utils/globals.h"
-#include "../communication/broadcast_communication.h"
 
 void *feedHandlerThread(void *ptdata) {
-    int index = -1;
     TDATA *td = (TDATA *)ptdata;
 
     int manager_fd = open(MANAGER_PIPE, O_RDWR);
@@ -40,9 +37,7 @@ void *feedHandlerThread(void *ptdata) {
             break;
             case MSG:
                 {
-                    RequestMsgManager request;
-                    read(manager_fd, &request, sizeof(RequestMsgManager));
-                    //  createMsg(comunicacao, td);
+                    createMsg(manager_fd, td);
                 }
             break;
             case SUBSCRIBE:
@@ -65,5 +60,4 @@ void *feedHandlerThread(void *ptdata) {
 
         }
     }
-    close(manager_fd);
 }

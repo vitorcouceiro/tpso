@@ -1,14 +1,8 @@
-//Commands User
-#define EXIT "exit"
-#define TOPICS "topics"
-#define MSG "msg"
-#define SUBSCRIBE "subscribe"
-#define UNSUBSCRIBE "unsubscribe"
+// Last update: 2021-10-06 20:00
 
 //Commands Admin
 #define USERS "users"
 #define REMOVE "remove"
-#define TOPICS "topics"
 #define SHOW "show"
 #define LOCK "lock"
 #define UNLOCK "unlock"

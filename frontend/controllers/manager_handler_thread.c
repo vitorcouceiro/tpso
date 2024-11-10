@@ -2,35 +2,60 @@
 #include "../../utils/includes.h"
 #include "../../backend/models/comunicacao.h"
 #include "../feed.h"
-#include "../display/exit_info_display.h"
 #include "../display/topic_display.h"
 
 void *managerHandlerThread(void *ptdata) {
     const TFEED *td = (TFEED *)ptdata;
-    Comunicacao comunicacao;
 
 
     int feed_fd = open(td->FEED_PIPE, O_RDWR);
     if (feed_fd == -1) {
+
         perror(ERROR_OPENING_FEED_PIPE);
         unlink(td->FEED_PIPE);
         exit(EXIT_FAILURE);
     }
 
     while (1) {
-        read(feed_fd, &comunicacao, sizeof(Comunicacao));
+        ResponseType responseType;
+        read(feed_fd, &responseType, sizeof(ResponseType));
 
         //system("clear");
 
-        if (strcmp(comunicacao.tipoInformacao, TOPICS) == 0) {
-            displayTopics(comunicacao);
-        }else if(strcmp(comunicacao.tipoInformacao,EXIT_INFO) == 0){
+        switch (responseType) {
+            case LIST_TOPICS:
+                {
+                    ResponseListTopics response;
+                    read(feed_fd, &response, sizeof(ResponseListTopics));
+                    displayTopics(response);
+                }
+                break;
+            case USER_EXPELLED:
+                {
+                    ResponseInfoError response;
+                    read(feed_fd, &response, sizeof(ResponseInfoError));
+                    printf("%s\n", response.buffer);
+                    exit(EXIT_FAILURE);
+                }
+            case USER_EXPELLED_NOTIFICATION:
+                {
+                    ResponseInfoError response;
+                    read(feed_fd, &response, sizeof(ResponseInfoError));
+                    printf("%s\n", response.buffer);
+                }
+                break;
+            default:
+                break;
+
+        }
+
+        /*
+        if(strcmp(comunicacao.tipoInformacao,EXIT_INFO) == 0){
             displayExitInfo(comunicacao);
         }else if(strcmp(comunicacao.tipoInformacao, EXIT) == 0){
             unlink(td->FEED_PIPE);
             printf(USER_REMOVED);
-            exit(EXIT_FAILURE);
-        }
+        }*/
 
         printf("cmd > ");
         fflush(stdout);

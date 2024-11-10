@@ -3,12 +3,12 @@
 
 // Info
 #define EMPTY_COMMAND INFO_HEADER " Comando vazio.\n"
-#define LOGIN_SUCCESS INFO_HEADER " Login efetuado com sucesso!\n"
+#define LOGIN_SUCCESSS INFO_HEADER " Login efetuado com sucesso!\n"
 #define NO_TOPICS INFO_HEADER " Ainda nao existem topicos!!\n"
 #define USER_REMOVED INFO_HEADER " Fostes expulso da plataforma!!\n"
-#define USER_REMOVED_SPECIFIC INFO_HEADER " O utilizador %s foi expulso da plataforma.\n"
-#define USER_NOT_FOUND INFO_HEADER " O utilizador %s não foi encontrado.\n"
-#define USER_REMOVED_SUCCESS INFO_HEADER " O utilizador %s foi removido com sucesso.\n"
+#define USER_REMOVED_SPECIFIC INFO_HEADER " O utilizador '%s' foi expulso da plataforma.\n"
+#define USER_NOT_FOUND INFO_HEADER " O utilizador '%s' não foi encontrado.\n"
+#define USER_REMOVED_SUCCESS INFO_HEADER " O utilizador '%s' foi removido com sucesso.\n"
 #define NO_USERS_CONNECTED INFO_HEADER " Nenhum utilizador conectado ate ao momento.\n"
 #define EXITING INFO_HEADER " A sair...\n"
 #define TOPIC_NOT_FOUND INFO_HEADER " O topico %s nao foi encontrado.\n"

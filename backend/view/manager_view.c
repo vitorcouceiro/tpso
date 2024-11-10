@@ -127,7 +127,7 @@ void managerView(){
     td.n_users = 0;
     td.topic->n_persistentes = 0;
 
-    system("clear");
+    //system("clear");
 
     signal(SIGINT, cleanup);
 
@@ -173,7 +173,7 @@ void managerView(){
 
         buffer[strlen(buffer) - 1] = '\0';
 
-        system("clear");
+        //system("clear");
         processCommandAdm(buffer, &td);
 
     } while (1);

@@ -4,6 +4,7 @@
 #include "../communication/broadcast_communication.h"
 #include "../../utils/globals.h"
 
+/*
 void createMsg(Comunicacao comunicacao,TDATA *td){
     int index = -1;
     long time = 0;
@@ -79,3 +80,4 @@ void createMsg(Comunicacao comunicacao,TDATA *td){
     }
     unicastMsg(comunicacao);
 }
+*/

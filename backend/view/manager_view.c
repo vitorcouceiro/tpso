@@ -7,6 +7,7 @@
 #include "../service/user_service.h"
 #include "../service/topic_service.h"
 #include "../controllers/feed_handler_thread.h"
+#include "../controllers/permanent_msg_thread.h"
 #include "../../utils/globals.h"
 
 int countWords(const char *buffer){
@@ -119,7 +120,7 @@ void processCommandAdm(char *buffer, TDATA *td){
 }
 
 void managerView(){
-    pthread_t thread;
+    pthread_t threadfeed,threadpermanentmsgs;
     char buffer[MAX_MSG_SIZE];
 
     TDATA td;
@@ -153,7 +154,12 @@ void managerView(){
         exit(EXIT_FAILURE);
     }
 
-    if (pthread_create(&thread, NULL, feedHandlerThread, (void*)&td) != 0) {
+    if (pthread_create(&threadfeed, NULL, feedHandlerThread, (void*)&td) != 0) {
+        perror(ERROR_CREATING_THREAD);
+        exit(EXIT_FAILURE);
+    }
+
+    if (pthread_create(&threadpermanentmsgs, NULL, permanentMsgHandlerThread, (void*)&td) != 0) {
         perror(ERROR_CREATING_THREAD);
         exit(EXIT_FAILURE);
     }

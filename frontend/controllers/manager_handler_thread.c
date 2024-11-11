@@ -51,7 +51,7 @@ void *managerHandlerThread(void *ptdata) {
                 {
                     ResponseMsg response;
                     read(feed_fd, &response, sizeof(ResponseMsg));
-                    printf("\n[MSG] %s\n", response.message);
+                    printf("\n[MSG] %s %s\n", response.topicName,response.message);
                 }
                 break;
             default:

@@ -4,6 +4,7 @@
 typedef struct msg
 {
     char msg[300];
+    int duration;
 }Msg;
 
 #endif

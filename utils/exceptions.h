@@ -15,8 +15,8 @@
 #define MANAGER_SHUTDOWN INFO_HEADER " O manager foi encerrado\n"
 #define TOPIC_LOCKED_SUCCESS INFO_HEADER " O topico %s foi bloqueado com sucesso.\n"
 #define TOPIC_UNLOCKED_SUCCESS INFO_HEADER " O topico %s foi desbloqueado com sucesso.\n"
-#define MAX_TOPICS_REACHED ERRO_HEADER " Numero maximo de topicos atingido.\n"
 #define MSG_SENT INFO_HEADER " Mensagem enviada com sucesso.\n"
+
 // Error
 #define INVALID_ARGS_FEED ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./feed <nome>\n" 
 #define INVALID_ARGS_MANA ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./manager\n" 
@@ -50,3 +50,7 @@
 #define TOPIC_ALREADY_UNLOCKED ERRO_HEADER " O topico %s ja se encontra desbloqueado.\n"
 #define SYNTAX_ERROR_CLEAR ERRO_HEADER " Erro de sintaxe. Sintaxe: clear\n"
 #define DURATION_ERROR ERRO_HEADER " A duracao tem de ser um numero inteiro.\n"
+#define TOPIC_LOCKED ERRO_HEADER "Topico bloqueado.\n"
+#define MAX_PERSISTENT_MSG_REACHED ERRO_HEADER " Numero maximo de mensagens persistentes atingido.\n"
+#define MAX_TOPICS_REACHED ERRO_HEADER " Numero maximo de topicos atingido.\n"
+

@@ -1,7 +1,7 @@
 all: manager feed
 
-manager: backend/manager.o backend/communication/broadcast_communication.o backend/communication/unicast_communication.o backend/controllers/feed_handler_thread.o backend/display/list_users_display.o backend/display/per_msg_display.o backend/display/topic_display.o backend/service/msg_service.o backend/service/user_service.o backend/service/topic_service.o backend/view/manager_view.o utils/globals.o
-	gcc -o backend/manager backend/manager.o backend/communication/broadcast_communication.o backend/communication/unicast_communication.o backend/controllers/feed_handler_thread.o backend/display/list_users_display.o backend/display/per_msg_display.o backend/display/topic_display.o backend/service/msg_service.o backend/service/user_service.o backend/service/topic_service.o backend/view/manager_view.o utils/globals.o
+manager: backend/manager.o backend/communication/broadcast_communication.o backend/communication/unicast_communication.o backend/controllers/feed_handler_thread.o backend/display/list_users_display.o backend/display/per_msg_display.o backend/display/topic_display.o backend/service/msg_service.o backend/service/user_service.o backend/service/topic_service.o backend/view/manager_view.o utils/globals.o backend/controllers/permanent_msg_thread.o
+	gcc -o backend/manager backend/manager.o backend/communication/broadcast_communication.o backend/communication/unicast_communication.o backend/controllers/feed_handler_thread.o backend/display/list_users_display.o backend/display/per_msg_display.o backend/display/topic_display.o backend/service/msg_service.o backend/service/user_service.o backend/service/topic_service.o backend/view/manager_view.o utils/globals.o backend/controllers/permanent_msg_thread.o
 
 feed: frontend/feed.o frontend/view/feed_view.o frontend/controllers/manager_handler_thread.o frontend/controllers/monitor_server_thread.o frontend/display/msg_no_persistent_display.o frontend/display/topic_display.o utils/globals.o
 	gcc -o frontend/feed frontend/feed.o frontend/view/feed_view.o frontend/controllers/manager_handler_thread.o frontend/controllers/monitor_server_thread.o frontend/display/msg_no_persistent_display.o frontend/display/topic_display.o utils/globals.o
@@ -38,6 +38,9 @@ backend/communication/unicast_communication.o: backend/communication/unicast_com
 
 backend/controllers/feed_handler_thread.o: backend/controllers/feed_handler_thread.c backend/controllers/feed_handler_thread.h
 	gcc -c backend/controllers/feed_handler_thread.c -o backend/controllers/feed_handler_thread.o
+
+backend/controllers/permanent_msg_thread.o: backend/controllers/permanent_msg_thread.c backend/controllers/permanent_msg_thread.h
+	gcc -c backend/controllers/permanent_msg_thread.c -o backend/controllers/permanent_msg_thread.o
 
 backend/display/list_users_display.o: backend/display/list_users_display.c backend/display/list_users_display.h
 	gcc -c backend/display/list_users_display.c -o backend/display/list_users_display.o

@@ -37,7 +37,6 @@ void *managerHandlerThread(void *ptdata) {
                     printf("\n%s", response.buffer);
                     exit(EXIT_FAILURE);
                 }
-                break;
             case USER_EXPELLED_NOTIFICATION:
             case MSG_ERROR:
             case MSG_CONFIRMATION:

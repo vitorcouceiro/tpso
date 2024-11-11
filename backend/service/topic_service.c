@@ -120,3 +120,57 @@ void subscribeTopic(int manager_fd, TDATA *td) {
     responseInfoError.type = TOPIC_SUBSCRIBE;
     unicastInfoError(responseInfoError);
 }
+
+void unsubscribeTopic(int manager_fd, TDATA *td) {
+    RequestSubscribeUnsubscribeManager request;
+    read(manager_fd, &request, sizeof(RequestSubscribeUnsubscribeManager));
+
+    ResponseInfoError responseInfoError;
+    strcpy(responseInfoError.base.FEED_PIPE, request.base.FEED_PIPE);
+    int index = -1;
+
+     for (int i = 0; i < td->n_topics; i++) {
+        if (strcmp(td->topic[i].nome, request.topicName) == 0) {
+            index = i;
+            break;
+        }
+    }
+
+    if(index==-1){
+        responseInfoError.type = TOPIC_UNSUBSCRIBE;
+        strcpy(responseInfoError.buffer, TOPIC_NOT_FOUND);
+        unicastInfoError(responseInfoError);
+        return;
+    }else {
+        int userExists = 0;
+        for (int j = 0; j < td->topic[index].n_subscribers; j++) {
+            if (strcmp(td->topic[index].subscribers[j].nome, request.base.userName) == 0) {
+                userExists = 1;
+                break;
+            }
+        }
+
+        if (userExists) {
+            for (int k = 0; k < td->topic[index].n_subscribers; k++) {
+                if (strcmp(td->topic[index].subscribers[k].nome, request.base.userName) == 0) {
+                    for (int l = k; l < td->topic[index].n_subscribers - 1; l++) {
+                        strcpy(td->topic[index].subscribers[l].nome, td->topic[index].subscribers[l + 1].nome);
+                    }
+                    td->topic[index].n_subscribers--;
+                    break;
+                }
+            }
+            if (td->topic[index].n_subscribers == 0) {
+                for (int m = index; m < td->n_topics - 1; m++) {
+                    td->topic[m] = td->topic[m + 1];
+                }
+                td->n_topics--;
+            }
+            strcpy(responseInfoError.buffer, UNSUBSCRIPTION_SUCCESS);
+        } else {
+            strcpy(responseInfoError.buffer, USER_NOT_SUBSCRIBED);
+        }
+        responseInfoError.type = TOPIC_UNSUBSCRIBE;
+        unicastInfoError(responseInfoError);
+    }
+}

@@ -20,6 +20,7 @@
 #define TOPIC_SUBSCRIBED INFO_HEADER " O topico '%s' foi subscrito com sucesso.\n"
 #define USER_SUBSCRIBED INFO_HEADER " Subscreveste o topico '%s'.\n"
 #define SUBSCRIPTION_SUCCESS INFO_HEADER " Subscricao efetuada com sucesso.\n"
+#define UNSUBSCRIPTION_SUCCESS INFO_HEADER " Desinscricao efetuada com sucesso.\n"
 // Error
 #define INVALID_ARGS_FEED ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./feed <nome>\n" 
 #define INVALID_ARGS_MANA ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./manager\n" 
@@ -59,3 +60,5 @@
 #define ERROR_OPENING_FILE ERRO_HEADER " Erro ao abrir o arquivo.\n"
 #define TOPIC_NOT_EXIST_MAX_REACHED ERRO_HEADER " O seu topico nao existe e o número máximo de tópicos foi atingido.\n"
 #define USER_ALREADY_SUBSCRIBED ERRO_HEADER " Ja esta subscrito ao topico.\n"
+#define TOPIC_NOT_EXIST ERRO_HEADER " O topico nao existe.\n"
+#define USER_NOT_SUBSCRIBED ERRO_HEADER " Nao esta subscrito ao topico.\n"

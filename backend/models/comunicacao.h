@@ -78,7 +78,9 @@ typedef struct {
 typedef struct {
     ResponseType type;
     Base base;
+    int duration;
     char topicName[50];
+    char autorName[20];
     char message[256];
 } ResponseMsg;
 

@@ -53,4 +53,4 @@
 #define TOPIC_LOCKED ERRO_HEADER "Topico bloqueado.\n"
 #define MAX_PERSISTENT_MSG_REACHED ERRO_HEADER " Numero maximo de mensagens persistentes atingido.\n"
 #define MAX_TOPICS_REACHED ERRO_HEADER " Numero maximo de topicos atingido.\n"
-
+#define ERROR_OPENING_FILE ERRO_HEADER " Erro ao abrir o arquivo.\n"

@@ -4,6 +4,55 @@
 #include "../communication/broadcast_communication.h"
 #include "../../utils/globals.h"
 
+
+void readtxt(char *filename, TDATA *td) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        perror(ERROR_OPENING_FILE);
+        exit(EXIT_FAILURE);
+    }
+
+    char line[MAX_MSG_SIZE];
+    while (fgets(line, sizeof(line), file)) {
+        char topicName[20];
+        char userName[20];
+        int duration;
+        char message[MAX_MSG_SIZE];
+
+        if (sscanf(line, "%s %s %d %[^\n]", topicName, userName, &duration, message) == 4) {
+
+            int topicIndex = -1;
+            for (int i = 0; i < td->n_topics; i++) {
+                if (strcmp(td->topic[i].nome, topicName) == 0) {
+                    topicIndex = i;
+                    break;
+                }
+            }
+
+            if (topicIndex == -1) {
+                if (td->n_topics < MAX_TOPICS) {
+                    strcpy(td->topic[td->n_topics].nome, topicName);
+                    td->topic[td->n_topics].isLocked = 0;
+                    strcpy(td->topic[td->n_topics].persistente[td->topic[td->n_topics].n_persistentes].autor, userName);
+                    strcpy(td->topic[td->n_topics].persistente[td->topic[td->n_topics].n_persistentes].msg, message);
+                    td->topic[td->n_topics].persistente[td->topic[td->n_topics].n_persistentes].duration = duration;
+                    td->topic[td->n_topics].n_persistentes++;
+                    td->n_topics++;
+                }
+            } else {
+                if (td->topic[topicIndex].n_persistentes < MAX_PERSISTENT_MSG) {
+                    strcpy(td->topic[topicIndex].persistente[td->topic[topicIndex].n_persistentes].autor, userName);
+                    strcpy(td->topic[topicIndex].persistente[td->topic[topicIndex].n_persistentes].msg, message);
+                    td->topic[topicIndex].persistente[td->topic[topicIndex].n_persistentes].duration = duration;
+                    td->topic[topicIndex].n_persistentes++;
+                }
+            }
+        }
+    }
+
+    fclose(file);
+}
+
 void createMsg(int manager_fd, TDATA *td) {
 
     RequestMsgManager request;
@@ -35,9 +84,10 @@ void createMsg(int manager_fd, TDATA *td) {
 
         if(request.duration == 0) {
             responseMsg.type = MSG_NOTIFICATION;
+            responseMsg.duration = request.duration;
             strcpy(responseMsg.topicName, request.topicName);
             strcpy(responseMsg.message, request.message);
-            strcpy(responseMsg.base.userName, request.base.userName);
+            strcpy(responseMsg.autorName, request.base.userName);
             strcpy(responseMsg.base.FEED_PIPE, request.base.FEED_PIPE);
             broadcastMsg(td, responseMsg);
 
@@ -46,7 +96,13 @@ void createMsg(int manager_fd, TDATA *td) {
             strcpy(responseInfoError.buffer, MSG_SENT);
             unicastInfoError(responseInfoError);
         }else{
-
+            strcpy(td->topic[td->n_topics].nome, request.topicName);
+            td->topic[td->n_topics].isLocked = 0;
+            strcpy(td->topic[td->n_topics].persistente[td->topic[td->n_topics].n_persistentes].autor, request.base.userName);
+            strcpy(td->topic[td->n_topics].persistente[td->topic[td->n_topics].n_persistentes].msg, request.message);
+            td->topic[td->n_topics].persistente[td->topic[td->n_topics].n_persistentes].duration = request.duration;
+            td->topic[td->n_topics].n_persistentes++;
+            td->n_topics++;
         }
     }else {
         if(td->topic[index].isLocked == 1) { // topico bloqueado
@@ -57,9 +113,10 @@ void createMsg(int manager_fd, TDATA *td) {
         }else {
             if(request.duration == 0) {
                 responseMsg.type = MSG_NOTIFICATION;
+                responseMsg.duration = request.duration;
                 strcpy(responseMsg.topicName, request.topicName);
                 strcpy(responseMsg.message, request.message);
-                strcpy(responseMsg.base.userName, request.base.userName);
+                strcpy(responseMsg.autorName, request.base.userName);
                 strcpy(responseMsg.base.FEED_PIPE, request.base.FEED_PIPE);
                 broadcastMsg(td, responseMsg);
 
@@ -74,7 +131,10 @@ void createMsg(int manager_fd, TDATA *td) {
                     unicastInfoError(responseInfoError);
                     return;
                 }else {
-
+                    strcpy(td->topic[index].persistente[td->topic[index].n_persistentes].autor, request.base.userName);
+                    strcpy(td->topic[index].persistente[td->topic[index].n_persistentes].msg, request.message);
+                    td->topic[index].persistente[td->topic[index].n_persistentes].duration = request.duration;
+                    td->topic[index].n_persistentes++;
                 }
             }
         }

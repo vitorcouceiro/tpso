@@ -51,22 +51,13 @@ void *managerHandlerThread(void *ptdata) {
                 {
                     ResponseMsg response;
                     read(feed_fd, &response, sizeof(ResponseMsg));
-                    printf("\n[MSG] %s %s\n", response.topicName,response.message);
+                    printf("\n[MSG] %s %s %d %s\n",response.topicName,response.autorName,response.duration,response.message);
                 }
                 break;
             default:
                 break;
 
         }
-
-        /*
-        if(strcmp(comunicacao.tipoInformacao,EXIT_INFO) == 0){
-            displayExitInfo(comunicacao);
-        }else if(strcmp(comunicacao.tipoInformacao, EXIT) == 0){
-            unlink(td->FEED_PIPE);
-            printf(USER_REMOVED);
-        }*/
-
         printf("cmd > ");
         fflush(stdout);
     }

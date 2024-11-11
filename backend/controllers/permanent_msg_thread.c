@@ -14,6 +14,8 @@ void removePersistentMsg(TDATA *td, int topicIndex, int msgIndex) {
 void *permanentMsgHandlerThread(void *ptdata) {
     TDATA *td = (TDATA *)ptdata;
 
+    // ler ficheiro de mensagens persistentes
+
     while (1) {
         sleep(CHECK_INTERVAL);
 
@@ -21,6 +23,7 @@ void *permanentMsgHandlerThread(void *ptdata) {
             for (int j = 0; j < td->topic[i].n_persistentes; j++) {
                 if (td->topic[i].persistente[j].duration == 0) {
                     removePersistentMsg(td, i, j);
+                    j--;
                 } else {
                     td->topic[i].persistente[j].duration--;
                 }

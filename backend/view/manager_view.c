@@ -6,6 +6,7 @@
 #include "../display/topic_display.h"
 #include "../service/user_service.h"
 #include "../service/topic_service.h"
+#include "../service/msg_service.h"
 #include "../controllers/feed_handler_thread.h"
 #include "../controllers/permanent_msg_thread.h"
 #include "../../utils/globals.h"
@@ -129,6 +130,14 @@ void managerView(){
     td.topic->n_persistentes = 0;
 
     //system("clear");
+
+    char *filename = getenv("MSG_FICH");
+    if (filename == NULL) {
+        printf("Environment variable MSG_FICH not set\n");
+        exit(EXIT_FAILURE);
+    }
+
+    readtxt(filename, &td);
 
     signal(SIGINT, cleanup);
 

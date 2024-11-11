@@ -3,10 +3,6 @@
 #include "../../utils/includes.h"
 
 void displayTopics(TDATA *td){
-
-    printf("NOME1: %s\n", td->topic[0].nome);
-    printf("NOME2: %s\n", td->topic[1].nome);
-    printf("NOME3: %s\n", td->topic[2].nome);
     if (td->n_topics == 0) {
         printf(NO_TOPICS);
     } else {

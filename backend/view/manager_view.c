@@ -132,7 +132,7 @@ void managerView(){
     td.topic->n_persistentes = 0;
     td.topic->n_subscribers = 0;
 
-    //system("clear");
+    system("clear");
 
     char *filename = getenv("MSG_FICH");
     if (filename == NULL) {

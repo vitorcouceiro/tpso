@@ -52,9 +52,6 @@ void readtxt(char *filename, TDATA *td) {
     }
 
     fclose(file);
-    printf("NOME1: %s\n", td->topic[0].nome);
-    printf("NOME2: %s\n", td->topic[1].nome);
-    printf("NOME3: %s\n", td->topic[2].nome);
 }
 
 void createMsg(int manager_fd, TDATA *td) {
@@ -87,6 +84,8 @@ void createMsg(int manager_fd, TDATA *td) {
         }
 
         if(request.duration == 0) {
+            //nao sei ate que ponto faz sentido esta a escrever uma mensagem nao permanente que nao existe ou seja nao esta subscrito por ninguem
+            /*
             responseMsg.type = MSG_NOTIFICATION;
             responseMsg.duration = request.duration;
             strcpy(responseMsg.topicName, request.topicName);
@@ -94,6 +93,7 @@ void createMsg(int manager_fd, TDATA *td) {
             strcpy(responseMsg.autorName, request.base.userName);
             strcpy(responseMsg.base.FEED_PIPE, request.base.FEED_PIPE);
             broadcastMsg(td, responseMsg);
+            */
 
             responseInfoError.type = MSG_CONFIRMATION;
             strcpy(responseInfoError.base.FEED_PIPE, request.base.FEED_PIPE);
@@ -122,7 +122,7 @@ void createMsg(int manager_fd, TDATA *td) {
                 strcpy(responseMsg.message, request.message);
                 strcpy(responseMsg.autorName, request.base.userName);
                 strcpy(responseMsg.base.FEED_PIPE, request.base.FEED_PIPE);
-                broadcastMsg(td, responseMsg);
+                broadcastMsg(td, responseMsg,index);
 
                 responseInfoError.type = MSG_CONFIRMATION;
                 strcpy(responseInfoError.base.FEED_PIPE, request.base.FEED_PIPE);

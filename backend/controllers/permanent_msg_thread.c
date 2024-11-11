@@ -20,12 +20,13 @@ void *permanentMsgHandlerThread(void *ptdata) {
         sleep(CHECK_INTERVAL);
 
         for (int i = 0; i < td->n_topics; i++) {
-            for (int j = 0; j < td->topic[i].n_persistentes; j++) {
+            int j = 0;
+            while (j < td->topic[i].n_persistentes) {
                 if (td->topic[i].persistente[j].duration == 0) {
                     removePersistentMsg(td, i, j);
-                    j--;
                 } else {
                     td->topic[i].persistente[j].duration--;
+                    j++;
                 }
             }
         }

@@ -42,9 +42,7 @@ void *feedHandlerThread(void *ptdata) {
             break;
             case SUBSCRIBE:
                 {
-                    RequestSubscribeUnsubscribeManager request;
-                    read(manager_fd, &request, sizeof(RequestSubscribeUnsubscribeManager));
-                    // subscribeTopics();
+                    subscribeTopic(manager_fd, td);
                 }
             break;
             case UNSUBSCRIBE:

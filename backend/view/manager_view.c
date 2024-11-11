@@ -23,6 +23,7 @@ int countWords(const char *buffer){
 }
 
 void processCommandAdm(char *buffer, TDATA *td){
+
     int index = -1;
 
 
@@ -118,6 +119,7 @@ void processCommandAdm(char *buffer, TDATA *td){
         default:
             break;
     }
+
 }
 
 void managerView(){
@@ -128,6 +130,7 @@ void managerView(){
     td.n_topics = 0;
     td.n_users = 0;
     td.topic->n_persistentes = 0;
+    td.topic->n_subscribers = 0;
 
     //system("clear");
 
@@ -138,6 +141,10 @@ void managerView(){
     }
 
     readtxt(filename, &td);
+
+    printf("NOME1: %s\n", td.topic[0].nome);
+    printf("NOME2: %s\n", td.topic[1].nome);
+    printf("NOME3: %s\n", td.topic[2].nome);
 
     signal(SIGINT, cleanup);
 
@@ -172,7 +179,9 @@ void managerView(){
         perror(ERROR_CREATING_THREAD);
         exit(EXIT_FAILURE);
     }
-
+    printf("NOME1: %s\n", td.topic[0].nome);
+    printf("NOME2: %s\n", td.topic[1].nome);
+    printf("NOME3: %s\n", td.topic[2].nome);
     do {
         printf("cmd > ");
 
@@ -189,6 +198,7 @@ void managerView(){
         buffer[strlen(buffer) - 1] = '\0';
 
         //system("clear");
+
         processCommandAdm(buffer, &td);
 
     } while (1);

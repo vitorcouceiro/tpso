@@ -3,6 +3,7 @@
 #include "../communication/unicast_communication.h"
 #include "../communication/broadcast_communication.h"
 #include "../../utils/globals.h"
+#include "../manager.h"
 
 
 void readtxt(char *filename, TDATA *td) {
@@ -51,6 +52,9 @@ void readtxt(char *filename, TDATA *td) {
     }
 
     fclose(file);
+    printf("NOME1: %s\n", td->topic[0].nome);
+    printf("NOME2: %s\n", td->topic[1].nome);
+    printf("NOME3: %s\n", td->topic[2].nome);
 }
 
 void createMsg(int manager_fd, TDATA *td) {
@@ -140,51 +144,4 @@ void createMsg(int manager_fd, TDATA *td) {
         }
     }
 
-
 }
-/*
-void createMsg(Comunicacao comunicacao,TDATA *td){
-
-
-    // se o topico nao existir
-    if(index == -1){
-        // ALGO DE ERRADO AQUI
-        if(td->n_topics >= MAX_TOPICS){
-            strcpy(comunicacao.buffer,"Maximo de topicos atingido\n");
-            unicastMsg(comunicacao);
-            return;
-        }
-        if(atoi(duration) == 0) {
-            strcpy(comunicacao.buffer,message);
-            broadcastMsg(td,comunicacao);
-
-        }else{
-            if(td->topic[td->n_topics].n_persistentes == MAX_PERSISTENT_MSG){
-                strcpy(comunicacao.buffer,"Maximo de mensagens persistentes atingido\n");
-                unicastMsg(comunicacao);
-                return;
-            }
-            strcpy(td->topic[td->n_topics].nome,topic);
-            td->topic[td->n_topics].isLocked = 0;
-            td->topic[td->n_topics].n_persistentes ++;
-
-        }
-        //strcpy(td->topic[td->n_topics].estado,"desbloqueado");
-        td->n_topics ++;
-    }else{
-        if(td->topic[index].isLocked == 1){
-            strcpy(comunicacao.buffer,"Topico bloqueado\n");
-            unicastMsg(comunicacao);
-            return;
-        }else{
-            if(duration == 0){// mensagem nao persistente
-
-            }else{ //mensagem persistente
-
-            }
-        }
-
-    }
-    unicastMsg(comunicacao);
-}
-*/

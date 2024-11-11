@@ -44,6 +44,7 @@ void *managerHandlerThread(void *ptdata) {
                 }
             case USER_EXPELLED_NOTIFICATION:
             case MSG_ERROR:
+            case TOPIC_SUBSCRIBE:
             case MSG_CONFIRMATION:
                 {
                     ResponseInfoError response;

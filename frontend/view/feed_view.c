@@ -106,6 +106,7 @@ void processCommand (const char *buffer, TFEED td){
                 strcpy(requestSubscribe.topicName, topic);
                 strcpy(requestSubscribe.base.userName, td.UserName);
                 strcpy(requestSubscribe.base.FEED_PIPE, td.FEED_PIPE);
+                write(td.manager_fd, &requestSubscribe.type, sizeof(RequestType));
                 write(td.manager_fd, &requestSubscribe, sizeof(RequestSubscribeUnsubscribeManager));
 
                 return ;
@@ -127,6 +128,7 @@ void processCommand (const char *buffer, TFEED td){
                 strcpy(requestUnsubscribe.topicName, topic);
                 strcpy(requestUnsubscribe.base.userName, td.UserName);
                 strcpy(requestUnsubscribe.base.FEED_PIPE, td.FEED_PIPE);
+                write(td.manager_fd, &requestUnsubscribe.type, sizeof(RequestType));
                 write(td.manager_fd, &requestUnsubscribe, sizeof(RequestSubscribeUnsubscribeManager));
 
                 return ;

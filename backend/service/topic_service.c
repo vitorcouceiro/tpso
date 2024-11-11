@@ -2,6 +2,7 @@
 #include "../../utils/includes.h"
 #include "../models/comunicacao.h"
 #include "../manager.h"
+#include "../../utils/globals.h"
 #include "../communication/unicast_communication.h"
 
 void sendTopics(int manager_fd, TDATA *td) {
@@ -65,3 +66,57 @@ void unlockTopic(TDATA *td, char *topic) {
     }
 }
 
+void subscribeTopic(int manager_fd, TDATA *td) {
+    RequestSubscribeUnsubscribeManager request;
+    read(manager_fd, &request, sizeof(RequestSubscribeUnsubscribeManager));
+
+    ResponseInfoError responseInfoError;
+    strcpy(responseInfoError.base.FEED_PIPE, request.base.FEED_PIPE);
+    int index = -1;
+
+    for (int i = 0; i < td->n_topics; i++) {
+        if (strcmp(td->topic[i].nome, request.topicName) == 0) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+
+        if (td->n_topics == MAX_TOPICS) {
+            strcpy(responseInfoError.buffer, TOPIC_NOT_EXIST_MAX_REACHED);
+            responseInfoError.type = TOPIC_SUBSCRIBE;
+            unicastInfoError(responseInfoError);
+            return;
+        }
+
+
+        strcpy(td->topic[td->n_topics].nome, request.topicName);
+        td->topic[td->n_topics].n_persistentes = 0;
+        td->topic[td->n_topics].isLocked = 0;
+        strcpy(td->topic[td->n_topics].subscribers[0].nome, request.base.userName);
+        td->topic[td->n_topics].n_subscribers = 1;
+        td->n_topics++;
+
+        strcpy(responseInfoError.buffer, SUBSCRIPTION_SUCCESS);
+    } else {
+        int userExists = 0;
+        for (int j = 0; j < td->topic[index].n_subscribers; j++) {
+            if (strcmp(td->topic[index].subscribers[j].nome, request.base.userName) == 0) {
+                userExists = 1;
+                break;
+            }
+        }
+
+        if (userExists) {
+            strcpy(responseInfoError.buffer, USER_ALREADY_SUBSCRIBED);
+        } else {
+            strcpy(td->topic[index].subscribers[td->topic[index].n_subscribers].nome, request.base.userName);
+            td->topic[index].n_subscribers++;
+            strcpy(responseInfoError.buffer, SUBSCRIPTION_SUCCESS);
+        }
+    }
+
+    responseInfoError.type = TOPIC_SUBSCRIBE;
+    unicastInfoError(responseInfoError);
+}

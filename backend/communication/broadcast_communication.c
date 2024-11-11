@@ -31,6 +31,7 @@ void broadcastMsg(const TDATA *td, ResponseMsg responseMsg) {
 
     for (int i = 0; i < td->n_users; i++) {
         if(strcmp(feed_pipe, td->user[i].FEED_PIPE) != 0) {
+            //verificar se o user esta subscrito ao topico
             strcpy(responseMsg.base.FEED_PIPE, td->user[i].FEED_PIPE);
             unicastMsg(responseMsg);
         }

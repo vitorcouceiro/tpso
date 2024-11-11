@@ -98,6 +98,18 @@ void handleLogoutRequest(int manager_fd, TDATA *td) {
 
     for (int i = 0; i < td->n_users; i++) {
         if (strcmp(request.base.userName, td->user[i].nome) == 0) {
+            for (int t = 0; t < td->n_topics; t++) {
+                for (int s = 0; s < td->topic[t].n_subscribers; s++) {
+                    if (strcmp(td->topic[t].subscribers[s].nome, request.base.userName) == 0) {
+                        for (int k = s; k < td->topic[t].n_subscribers - 1; k++) {
+                            strcpy(td->topic[t].subscribers[k].nome, td->topic[t].subscribers[k + 1].nome);
+                        }
+                        td->topic[t].n_subscribers--;
+                        break;
+                    }
+                }
+            }
+
             for (int j = i; j < td->n_users - 1; j++) {
                 strcpy(td->user[j].nome, td->user[j + 1].nome);
             }

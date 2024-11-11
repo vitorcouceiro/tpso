@@ -16,7 +16,7 @@
 #define TOPIC_LOCKED_SUCCESS INFO_HEADER " O topico %s foi bloqueado com sucesso.\n"
 #define TOPIC_UNLOCKED_SUCCESS INFO_HEADER " O topico %s foi desbloqueado com sucesso.\n"
 #define MSG_SENT INFO_HEADER " Mensagem enviada com sucesso.\n"
-
+#define NO_PERSISTENT_MSG INFO_HEADER " Não existem mensagens persistentes no tópico %s.\n"
 // Error
 #define INVALID_ARGS_FEED ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./feed <nome>\n" 
 #define INVALID_ARGS_MANA ERRO_HEADER " Numero de argumentos invalidos. Sintaxe: ./manager\n" 
@@ -54,3 +54,4 @@
 #define MAX_PERSISTENT_MSG_REACHED ERRO_HEADER " Numero maximo de mensagens persistentes atingido.\n"
 #define MAX_TOPICS_REACHED ERRO_HEADER " Numero maximo de topicos atingido.\n"
 #define ERROR_OPENING_FILE ERRO_HEADER " Erro ao abrir o arquivo.\n"
+

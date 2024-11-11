@@ -23,6 +23,8 @@ void createMsg(int manager_fd, TDATA *td) {
         }
     }
 
+    //alterar aqui codigo porque nao sei se ao enviar um topico a algo que nao existe se ele cria o topico
+
     if(index == -1) { // se o topico nao existir
         if(td->n_topics >= MAX_TOPICS){
             responseInfoError.type = MSG_ERROR;
@@ -35,13 +37,47 @@ void createMsg(int manager_fd, TDATA *td) {
             responseMsg.type = MSG_NOTIFICATION;
             strcpy(responseMsg.topicName, request.topicName);
             strcpy(responseMsg.message, request.message);
+            strcpy(responseMsg.base.userName, request.base.userName);
+            strcpy(responseMsg.base.FEED_PIPE, request.base.FEED_PIPE);
             broadcastMsg(td, responseMsg);
-        }else {
+
+            responseInfoError.type = MSG_CONFIRMATION;
+            strcpy(responseInfoError.base.FEED_PIPE, request.base.FEED_PIPE);
+            strcpy(responseInfoError.buffer, MSG_SENT);
+            unicastInfoError(responseInfoError);
+        }else{
 
         }
-
     }else {
+        if(td->topic[index].isLocked == 1) { // topico bloqueado
+            responseInfoError.type = MSG_ERROR;
+            strcpy(responseInfoError.buffer, TOPIC_LOCKED);
+            unicastInfoError(responseInfoError);
+            return;
+        }else {
+            if(request.duration == 0) {
+                responseMsg.type = MSG_NOTIFICATION;
+                strcpy(responseMsg.topicName, request.topicName);
+                strcpy(responseMsg.message, request.message);
+                strcpy(responseMsg.base.userName, request.base.userName);
+                strcpy(responseMsg.base.FEED_PIPE, request.base.FEED_PIPE);
+                broadcastMsg(td, responseMsg);
 
+                responseInfoError.type = MSG_CONFIRMATION;
+                strcpy(responseInfoError.base.FEED_PIPE, request.base.FEED_PIPE);
+                strcpy(responseInfoError.buffer, MSG_SENT);
+                unicastInfoError(responseInfoError);
+            }else {
+                if(td->topic[index].n_persistentes == MAX_PERSISTENT_MSG){
+                    responseInfoError.type = MSG_ERROR;
+                    strcpy(responseInfoError.buffer, MAX_PERSISTENT_MSG_REACHED);
+                    unicastInfoError(responseInfoError);
+                    return;
+                }else {
+
+                }
+            }
+        }
     }
 
 

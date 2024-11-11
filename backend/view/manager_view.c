@@ -133,7 +133,7 @@ void managerView(){
 
     char *filename = getenv("MSG_FICH");
     if (filename == NULL) {
-        printf("Environment variable MSG_FICH not set\n");
+        printf("Variável de ambiente MSG_FICH não definida\n");
         exit(EXIT_FAILURE);
     }
 

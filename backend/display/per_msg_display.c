@@ -3,7 +3,6 @@
 
 void displayPerMsg(TDATA *td, char *topic) {
     int index = -1;
-    //printf("ENTROU:%d\n",td->n_topics);
     for (int i = 0; i < td->n_topics; i++) {
         if (strcmp(td->topic[i].nome, topic) == 0) {
             index = i;

@@ -24,6 +24,18 @@ void expelUser(TDATA *td, char *buffer) {
 
             td->n_users--;
 
+            for (int i = 0; i < td->n_topics; i++) {
+                for (int j = 0; j < td->topic[i].n_subscribers; j++) {
+                    if (strcmp(td->topic[i].subscribers[j].nome, username) == 0) {
+                        for (int k = j; k < td->topic[i].n_subscribers - 1; k++) {
+                            strcpy(td->topic[i].subscribers[k].nome, td->topic[i].subscribers[k + 1].nome);
+                        }
+                        td->topic[i].n_subscribers--;
+                        break;
+                    }
+                }
+            }
+
             strcpy(responseInfoError.buffer,USER_REMOVED);
             responseInfoError.type = USER_EXPELLED;
             unicastInfoError(responseInfoError);

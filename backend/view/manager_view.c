@@ -142,10 +142,6 @@ void managerView(){
 
     readtxt(filename, &td);
 
-    printf("NOME1: %s\n", td.topic[0].nome);
-    printf("NOME2: %s\n", td.topic[1].nome);
-    printf("NOME3: %s\n", td.topic[2].nome);
-
     signal(SIGINT, cleanup);
 
     if (access(MANAGER_PIPE, F_OK) == 0) {
@@ -175,13 +171,13 @@ void managerView(){
         exit(EXIT_FAILURE);
     }
 
+
     if (pthread_create(&threadpermanentmsgs, NULL, permanentMsgHandlerThread, (void*)&td) != 0) {
         perror(ERROR_CREATING_THREAD);
         exit(EXIT_FAILURE);
     }
-    printf("NOME1: %s\n", td.topic[0].nome);
-    printf("NOME2: %s\n", td.topic[1].nome);
-    printf("NOME3: %s\n", td.topic[2].nome);
+
+
     do {
         printf("cmd > ");
 

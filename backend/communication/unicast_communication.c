@@ -24,6 +24,11 @@ void unicastListTopics(ResponseListTopics responseListTopics) {
 
     write(feed_fd, &responseListTopics.type, sizeof(ResponseType));
     write(feed_fd, &responseListTopics, sizeof(ResponseListTopics));
+    /*
+    printf("ENVIADO: %d\n",responseListTopics.n_topics);
+    printf("ENVIADO: %s\n",responseListTopics.topic[0].nome);
+    printf("ENVIADO: %s\n",responseListTopics.topic[1].nome);
+    */
     close(feed_fd);
 }
 

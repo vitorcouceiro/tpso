@@ -27,6 +27,11 @@ void *managerHandlerThread(void *ptdata) {
                 {
                     ResponseListTopics response;
                     read(feed_fd, &response, sizeof(ResponseListTopics));
+                    /*
+                    printf("RECEBEU: %d\n",response.n_topics);
+                    printf("RECEBEU: %s\n",response.topic[0].nome);
+                    printf("RECEBEU: %s\n",response.topic[1].nome);
+                    */
                     displayTopics(response);
                 }
                 break;

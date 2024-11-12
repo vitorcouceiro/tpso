@@ -126,7 +126,6 @@ void createMsg(int manager_fd, TDATA *td) {
             responseInfoError.type = MSG_ERROR;
             strcpy(responseInfoError.buffer, TOPIC_LOCKED);
             unicastInfoError(responseInfoError);
-            return;
         }else {
             if(request.duration == 0) {
                 responseMsg.type = MSG_NOTIFICATION;

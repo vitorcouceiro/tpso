@@ -38,7 +38,7 @@ void lockTopic(TDATA *td, char *topic) {
         if (td->topic[index].isLocked == 1) {
             printf(TOPIC_ALREADY_LOCKED, topic);
         } else {
-            td->topic[index].isLocked = 0;
+            td->topic[index].isLocked = 1;
             printf(TOPIC_LOCKED_SUCCESS, topic);
         }
     }
@@ -60,7 +60,7 @@ void unlockTopic(TDATA *td, char *topic) {
         if (td->topic[index].isLocked == 0) {
             printf(TOPIC_ALREADY_UNLOCKED, topic);
         } else {
-            td->topic[index].isLocked = 1;
+            td->topic[index].isLocked = 0;
             printf(TOPIC_UNLOCKED_SUCCESS, topic);
         }
     }
@@ -152,7 +152,6 @@ void unsubscribeTopic(int manager_fd, TDATA *td) {
         responseInfoError.type = TOPIC_UNSUBSCRIBE;
         strcpy(responseInfoError.buffer, TOPIC_NOT_FOUND);
         unicastInfoError(responseInfoError);
-        return;
     }else {
         int userExists = 0;
         for (int j = 0; j < td->topic[index].n_subscribers; j++) {

@@ -33,7 +33,7 @@ void readtxt(char *filename, TDATA *td) {
             if (topicIndex == -1) {
                 if (td->n_topics < MAX_TOPICS) {
                     strcpy(td->topic[td->n_topics].nome, topicName);
-                    td->topic[td->n_topics].isLocked = 0;
+                    td->topic[td->n_topics].isLocked = 1;
                     strcpy(td->topic[td->n_topics].persistente[td->topic[td->n_topics].n_persistentes].autor, userName);
                     strcpy(td->topic[td->n_topics].persistente[td->topic[td->n_topics].n_persistentes].msg, message);
                     td->topic[td->n_topics].persistente[td->topic[td->n_topics].n_persistentes].duration = duration;
@@ -101,6 +101,7 @@ void createMsg(int manager_fd, TDATA *td) {
             unicastInfoError(responseInfoError);
             */
         }else{
+            printf("ENTROU11111\n");
             strcpy(td->topic[td->n_topics].nome, request.topicName);
             td->topic[td->n_topics].isLocked = 0;
             strcpy(td->topic[td->n_topics].persistente[td->topic[td->n_topics].n_persistentes].autor, request.base.userName);
@@ -122,11 +123,12 @@ void createMsg(int manager_fd, TDATA *td) {
             broadcastMsg(td, responseMsg,index);
         }
     }else {
-        if(td->topic[index].isLocked == 1) { // topico bloqueado
+        if(td->topic[index].isLocked == 1) {
             responseInfoError.type = MSG_ERROR;
             strcpy(responseInfoError.buffer, TOPIC_LOCKED);
             unicastInfoError(responseInfoError);
         }else {
+            printf("ENTROU222222\n");
             if(request.duration == 0) {
                 responseMsg.type = MSG_NOTIFICATION;
                 responseMsg.duration = request.duration;

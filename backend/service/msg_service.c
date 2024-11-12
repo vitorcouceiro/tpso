@@ -93,12 +93,13 @@ void createMsg(int manager_fd, TDATA *td) {
             strcpy(responseMsg.autorName, request.base.userName);
             strcpy(responseMsg.base.FEED_PIPE, request.base.FEED_PIPE);
             broadcastMsg(td, responseMsg);
-            */
+
 
             responseInfoError.type = MSG_CONFIRMATION;
             strcpy(responseInfoError.base.FEED_PIPE, request.base.FEED_PIPE);
             strcpy(responseInfoError.buffer, MSG_SENT);
             unicastInfoError(responseInfoError);
+            */
         }else{
             strcpy(td->topic[td->n_topics].nome, request.topicName);
             td->topic[td->n_topics].isLocked = 0;
@@ -107,6 +108,18 @@ void createMsg(int manager_fd, TDATA *td) {
             td->topic[td->n_topics].persistente[td->topic[td->n_topics].n_persistentes].duration = request.duration;
             td->topic[td->n_topics].n_persistentes++;
             td->n_topics++;
+
+            responseInfoError.type = MSG_CONFIRMATION;
+            strcpy(responseInfoError.buffer, "Mensagem criada com sucesso\n");
+            unicastInfoError(responseInfoError);
+
+            responseMsg.type = MSG_NOTIFICATION;
+            responseMsg.duration = request.duration;
+            strcpy(responseMsg.topicName, request.topicName);
+            strcpy(responseMsg.message, request.message);
+            strcpy(responseMsg.autorName, request.base.userName);
+            strcpy(responseMsg.base.FEED_PIPE, request.base.FEED_PIPE);
+            broadcastMsg(td, responseMsg,index);
         }
     }else {
         if(td->topic[index].isLocked == 1) { // topico bloqueado
@@ -134,11 +147,23 @@ void createMsg(int manager_fd, TDATA *td) {
                     strcpy(responseInfoError.buffer, MAX_PERSISTENT_MSG_REACHED);
                     unicastInfoError(responseInfoError);
                     return;
-                }else {
+                }else{
                     strcpy(td->topic[index].persistente[td->topic[index].n_persistentes].autor, request.base.userName);
                     strcpy(td->topic[index].persistente[td->topic[index].n_persistentes].msg, request.message);
                     td->topic[index].persistente[td->topic[index].n_persistentes].duration = request.duration;
                     td->topic[index].n_persistentes++;
+
+                    responseInfoError.type = MSG_CONFIRMATION;
+                    strcpy(responseInfoError.buffer, "Mensagem criada com sucesso\n");
+                    unicastInfoError(responseInfoError);
+
+                    responseMsg.type = MSG_NOTIFICATION;
+                    responseMsg.duration = request.duration;
+                    strcpy(responseMsg.topicName, request.topicName);
+                    strcpy(responseMsg.message, request.message);
+                    strcpy(responseMsg.autorName, request.base.userName);
+                    strcpy(responseMsg.base.FEED_PIPE, request.base.FEED_PIPE);
+                    broadcastMsg(td, responseMsg,index);
                 }
             }
         }

@@ -44,3 +44,16 @@ void unicastMsg(ResponseMsg responseMsg) {
     write(feed_fd, &responseMsg, sizeof(ResponseMsg));
     close(feed_fd);
 }
+
+void unicastSubscribe(ResponseSubscribeTopic responseSubscribeTopic) {
+    int feed_fd = open(responseSubscribeTopic.base.FEED_PIPE, O_WRONLY);
+
+    if (feed_fd == -1) {
+        perror(ERROR_OPENING_FEED_PIPE);
+        exit(EXIT_FAILURE);
+    }
+
+    write(feed_fd, &responseSubscribeTopic.type, sizeof(ResponseType));
+    write(feed_fd, &responseSubscribeTopic, sizeof(ResponseSubscribeTopic));
+    close(feed_fd);
+}

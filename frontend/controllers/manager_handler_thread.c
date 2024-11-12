@@ -27,11 +27,6 @@ void *managerHandlerThread(void *ptdata) {
                 {
                     ResponseListTopics response;
                     read(feed_fd, &response, sizeof(ResponseListTopics));
-                    /*
-                    printf("RECEBEU: %d\n",response.n_topics);
-                    printf("RECEBEU: %s\n",response.topic[0].nome);
-                    printf("RECEBEU: %s\n",response.topic[1].nome);
-                    */
                     displayTopics(response);
                 }
                 break;
@@ -39,18 +34,17 @@ void *managerHandlerThread(void *ptdata) {
                 {
                     ResponseInfoError response;
                     read(feed_fd, &response, sizeof(ResponseInfoError));
-                    printf("\n%s", response.buffer);
+                    printf("\n%s\n", response.buffer);
                     exit(EXIT_FAILURE);
                 }
             case USER_EXPELLED_NOTIFICATION:
             case MSG_ERROR:
-            case TOPIC_SUBSCRIBE:
             case TOPIC_UNSUBSCRIBE:
             case MSG_CONFIRMATION:
                 {
                     ResponseInfoError response;
                     read(feed_fd, &response, sizeof(ResponseInfoError));
-                    printf("\n%s", response.buffer);
+                    printf("\n%s\n", response.buffer);
                 }
                 break;
             case MSG_NOTIFICATION:
@@ -58,6 +52,18 @@ void *managerHandlerThread(void *ptdata) {
                     ResponseMsg response;
                     read(feed_fd, &response, sizeof(ResponseMsg));
                     printf("\n[MSG] %s %s %d %s\n",response.topicName,response.autorName,response.duration,response.message);
+                }
+                break;
+            case TOPIC_SUBSCRIBE:
+                {
+                    ResponseSubscribeTopic response;
+                    read(feed_fd, &response, sizeof(ResponseSubscribeTopic));
+                    printf("\n%s\n", response.info);
+
+                    for(int i = 0; i < response.n_persistentes; i++){
+                        printf("[MSG] %s %s %d %s\n",response.nomeTopico,response.persist[i].autor,response.persist[i].duration,response.persist[i].msg);
+                    }
+
                 }
                 break;
             default:

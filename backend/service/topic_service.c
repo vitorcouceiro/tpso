@@ -70,8 +70,9 @@ void subscribeTopic(int manager_fd, TDATA *td) {
     RequestSubscribeUnsubscribeManager request;
     read(manager_fd, &request, sizeof(RequestSubscribeUnsubscribeManager));
 
-    ResponseInfoError responseInfoError;
-    strcpy(responseInfoError.base.FEED_PIPE, request.base.FEED_PIPE);
+    ResponseSubscribeTopic responseSubscribeTopic;
+    strcpy(responseSubscribeTopic.base.FEED_PIPE, request.base.FEED_PIPE);
+
     int index = -1;
 
     for (int i = 0; i < td->n_topics; i++) {
@@ -84,9 +85,10 @@ void subscribeTopic(int manager_fd, TDATA *td) {
     if (index == -1) {
 
         if (td->n_topics == MAX_TOPICS) {
-            strcpy(responseInfoError.buffer, TOPIC_NOT_EXIST_MAX_REACHED);
-            responseInfoError.type = TOPIC_SUBSCRIBE;
-            unicastInfoError(responseInfoError);
+            strcpy(responseSubscribeTopic.info, TOPIC_NOT_EXIST_MAX_REACHED);
+            responseSubscribeTopic.type = TOPIC_SUBSCRIBE;
+            responseSubscribeTopic.n_persistentes = 0;
+            unicastSubscribe(responseSubscribeTopic);
             return;
         }
 
@@ -98,7 +100,8 @@ void subscribeTopic(int manager_fd, TDATA *td) {
         td->topic[td->n_topics].n_subscribers = 1;
         td->n_topics++;
 
-        strcpy(responseInfoError.buffer, SUBSCRIPTION_SUCCESS);
+        responseSubscribeTopic.n_persistentes = 0;
+        strcpy(responseSubscribeTopic.info, SUBSCRIPTION_SUCCESS);
     } else {
         int userExists = 0;
         for (int j = 0; j < td->topic[index].n_subscribers; j++) {
@@ -109,16 +112,25 @@ void subscribeTopic(int manager_fd, TDATA *td) {
         }
 
         if (userExists) {
-            strcpy(responseInfoError.buffer, USER_ALREADY_SUBSCRIBED);
+            strcpy(responseSubscribeTopic.info, USER_ALREADY_SUBSCRIBED);
         } else {
             strcpy(td->topic[index].subscribers[td->topic[index].n_subscribers].nome, request.base.userName);
             td->topic[index].n_subscribers++;
-            strcpy(responseInfoError.buffer, SUBSCRIPTION_SUCCESS);
+            strcpy(responseSubscribeTopic.info, SUBSCRIPTION_SUCCESS);
+
+            strcpy(responseSubscribeTopic.nomeTopico, td->topic[index].nome);
+            for(int i = 0; i < td->topic[index].n_persistentes; i++) {
+                strcpy(responseSubscribeTopic.persist[i].msg, td->topic[index].persistente[i].msg);
+                strcpy(responseSubscribeTopic.persist[i].autor, td->topic[index].persistente[i].autor);
+                responseSubscribeTopic.persist[i].duration = td->topic[index].persistente[i].duration;
+            }
+            responseSubscribeTopic.n_persistentes = td->topic[index].n_persistentes;
+            responseSubscribeTopic.type = TOPIC_SUBSCRIBE;
+            printf("%s\n", responseSubscribeTopic.persist[0].msg);
+            printf("%s\n", responseSubscribeTopic.persist[1].msg);
+            unicastSubscribe(responseSubscribeTopic);
         }
     }
-
-    responseInfoError.type = TOPIC_SUBSCRIBE;
-    unicastInfoError(responseInfoError);
 }
 
 void unsubscribeTopic(int manager_fd, TDATA *td) {

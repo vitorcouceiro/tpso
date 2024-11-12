@@ -62,7 +62,7 @@ void createMsg(int manager_fd, TDATA *td) {
     ResponseInfoError responseInfoError;
     strcpy(responseInfoError.base.FEED_PIPE, request.base.FEED_PIPE);
 
-    ResponseMsg responseMsg;// isto esta mal
+    ResponseMsg responseMsg;
     strcpy(responseMsg.base.FEED_PIPE, request.base.FEED_PIPE);
 
     int index = -1;
@@ -146,7 +146,6 @@ void createMsg(int manager_fd, TDATA *td) {
                     responseInfoError.type = MSG_ERROR;
                     strcpy(responseInfoError.buffer, MAX_PERSISTENT_MSG_REACHED);
                     unicastInfoError(responseInfoError);
-                    return;
                 }else{
                     strcpy(td->topic[index].persistente[td->topic[index].n_persistentes].autor, request.base.userName);
                     strcpy(td->topic[index].persistente[td->topic[index].n_persistentes].msg, request.message);

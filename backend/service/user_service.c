@@ -1,7 +1,7 @@
 #include "user_service.h"
 #include "../../utils/includes.h"
 #include "../manager.h"
-#include "../models/comunicacao.h"
+#include "../../utils/models/comunicacao.h"
 #include "../communication/unicast_communication.h"
 #include "../communication/broadcast_communication.h"
 #include "../../utils/globals.h"

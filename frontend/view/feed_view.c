@@ -1,6 +1,6 @@
 #include "feed_view.h"
 #include "../../utils/includes.h"
-#include "../../backend/models/comunicacao.h"
+#include "../../utils/models/comunicacao.h"
 #include "../feed.h"
 #include "../controllers/manager_handler_thread.h"
 #include "../../utils/globals.h"
@@ -157,7 +157,7 @@ void feedView(const char *nome) {
     RequestAuthManager requestAuthManager;
     TFEED td;
 
-    //system("clear");
+    system("clear");
     sleep(1);
 
     if (access(MANAGER_PIPE, F_OK) != 0) {

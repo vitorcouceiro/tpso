@@ -1,6 +1,6 @@
 #include "manager_handler_thread.h"
 #include "../../utils/includes.h"
-#include "../../backend/models/comunicacao.h"
+#include "../../utils/models/comunicacao.h"
 #include "../feed.h"
 #include "../display/topic_display.h"
 

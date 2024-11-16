@@ -1,7 +1,6 @@
 #include "permanent_msg_thread.h"
 #include "../../utils/includes.h"
 #include "../manager.h"
-#include "../models/comunicacao.h"
 
 void removePersistentMsg(TDATA *td, int topicIndex, int msgIndex) {
     for (int i = msgIndex; i < td->topic[topicIndex].n_persistentes - 1; i++) {

@@ -100,8 +100,10 @@ void subscribeTopic(int manager_fd, TDATA *td) {
         td->topic[td->n_topics].n_subscribers = 1;
         td->n_topics++;
 
+        responseSubscribeTopic.type = TOPIC_SUBSCRIBE;
         responseSubscribeTopic.n_persistentes = 0;
         strcpy(responseSubscribeTopic.info, SUBSCRIPTION_SUCCESS);
+        unicastSubscribe(responseSubscribeTopic);
     } else {
         int userExists = 0;
         for (int j = 0; j < td->topic[index].n_subscribers; j++) {

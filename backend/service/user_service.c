@@ -1,7 +1,7 @@
 #include "user_service.h"
 #include "../../utils/includes.h"
 #include "../manager.h"
-#include "../models/comunicacao.h"
+#include "../../utils/models/comunicacao.h"
 #include "../communication/unicast_communication.h"
 #include "../communication/broadcast_communication.h"
 #include "../../utils/globals.h"
@@ -23,6 +23,18 @@ void expelUser(TDATA *td, char *buffer) {
             }
 
             td->n_users--;
+
+            for (int i = 0; i < td->n_topics; i++) {
+                for (int j = 0; j < td->topic[i].n_subscribers; j++) {
+                    if (strcmp(td->topic[i].subscribers[j].nome, username) == 0) {
+                        for (int k = j; k < td->topic[i].n_subscribers - 1; k++) {
+                            strcpy(td->topic[i].subscribers[k].nome, td->topic[i].subscribers[k + 1].nome);
+                        }
+                        td->topic[i].n_subscribers--;
+                        break;
+                    }
+                }
+            }
 
             strcpy(responseInfoError.buffer,USER_REMOVED);
             responseInfoError.type = USER_EXPELLED;
@@ -86,6 +98,18 @@ void handleLogoutRequest(int manager_fd, TDATA *td) {
 
     for (int i = 0; i < td->n_users; i++) {
         if (strcmp(request.base.userName, td->user[i].nome) == 0) {
+            for (int t = 0; t < td->n_topics; t++) {
+                for (int s = 0; s < td->topic[t].n_subscribers; s++) {
+                    if (strcmp(td->topic[t].subscribers[s].nome, request.base.userName) == 0) {
+                        for (int k = s; k < td->topic[t].n_subscribers - 1; k++) {
+                            strcpy(td->topic[t].subscribers[k].nome, td->topic[t].subscribers[k + 1].nome);
+                        }
+                        td->topic[t].n_subscribers--;
+                        break;
+                    }
+                }
+            }
+
             for (int j = i; j < td->n_users - 1; j++) {
                 strcpy(td->user[j].nome, td->user[j + 1].nome);
             }

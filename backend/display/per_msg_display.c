@@ -3,7 +3,6 @@
 
 void displayPerMsg(TDATA *td, char *topic) {
     int index = -1;
-
     for (int i = 0; i < td->n_topics; i++) {
         if (strcmp(td->topic[i].nome, topic) == 0) {
             index = i;
@@ -13,7 +12,9 @@ void displayPerMsg(TDATA *td, char *topic) {
 
     if (index == -1) {
         printf(TOPIC_NOT_FOUND, topic);
-    } else {
+    } else if(td->topic[index].n_persistentes == 0) {
+        printf(NO_PERSISTENT_MSG, topic);
+    }else {
         for (int i = 0; i < td->topic[index].n_persistentes; i++) {
             printf("Mensagem %d: %s\n", i + 1, td->topic[index].persistente[i].msg);
         }

@@ -6,6 +6,7 @@
 #include "../display/topic_display.h"
 #include "../service/user_service.h"
 #include "../service/topic_service.h"
+#include "../service/msg_service.h"
 #include "../controllers/feed_handler_thread.h"
 #include "../controllers/permanent_msg_thread.h"
 #include "../../utils/globals.h"
@@ -22,6 +23,7 @@ int countWords(const char *buffer){
 }
 
 void processCommandAdm(char *buffer, TDATA *td){
+
     int index = -1;
 
 
@@ -117,6 +119,7 @@ void processCommandAdm(char *buffer, TDATA *td){
         default:
             break;
     }
+
 }
 
 void managerView(){
@@ -127,8 +130,17 @@ void managerView(){
     td.n_topics = 0;
     td.n_users = 0;
     td.topic->n_persistentes = 0;
+    td.topic->n_subscribers = 0;
 
-    //system("clear");
+    system("clear");
+
+    char *filename = getenv("MSG_FICH");
+    if (filename == NULL) {
+        printf("Variável de ambiente MSG_FICH não definida\n");
+        exit(EXIT_FAILURE);
+    }
+
+    readtxt(filename, &td);
 
     signal(SIGINT, cleanup);
 
@@ -159,10 +171,12 @@ void managerView(){
         exit(EXIT_FAILURE);
     }
 
+
     if (pthread_create(&threadpermanentmsgs, NULL, permanentMsgHandlerThread, (void*)&td) != 0) {
         perror(ERROR_CREATING_THREAD);
         exit(EXIT_FAILURE);
     }
+
 
     do {
         printf("cmd > ");
@@ -180,6 +194,7 @@ void managerView(){
         buffer[strlen(buffer) - 1] = '\0';
 
         //system("clear");
+
         processCommandAdm(buffer, &td);
 
     } while (1);

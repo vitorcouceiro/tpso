@@ -2,14 +2,16 @@
 #define TOPIC_H
 
 #include "msg.h"
+#include "subscriber.h"
 
 typedef struct
 {
     char nome[20];
+    int n_subscribers;
+    Subscriber subscribers[10];
     int n_persistentes;
-    //char estado[20];
     Msg persistente[5];
-    int isLocked;
+    int isLocked; // 0 - unlocked, 1 - locked
 } Topic;
 
 #endif // TOPIC_H

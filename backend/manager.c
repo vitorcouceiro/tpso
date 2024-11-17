@@ -14,5 +14,6 @@ int main(int argc, char *argv[]) {
         printf(INVALID_ARGS_MANA);
         exit(EXIT_FAILURE);
     }
+
     managerView();
 }

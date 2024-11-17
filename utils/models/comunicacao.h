@@ -54,6 +54,8 @@ typedef enum {
     MSG_ERROR,
     MSG_CONFIRMATION,
     MSG_NOTIFICATION,
+    TOPIC_SUBSCRIBE,
+    TOPIC_UNSUBSCRIBE,
 
 
     SUBSCRIBE_CONFIRMATION,
@@ -78,7 +80,9 @@ typedef struct {
 typedef struct {
     ResponseType type;
     Base base;
+    int duration;
     char topicName[50];
+    char autorName[20];
     char message[256];
 } ResponseMsg;
 
@@ -86,5 +90,12 @@ typedef struct {
     ResponseType type;
 }ResponseExpelUser;
 
-
+typedef struct {
+    ResponseType type;
+    Base base;
+    char info[256];
+    int n_persistentes;
+    Msg persist[5];
+    char nomeTopico[20];
+}ResponseSubscribeTopic;
 #endif // COMUNICACAO_H

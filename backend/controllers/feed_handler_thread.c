@@ -1,7 +1,7 @@
 #include "feed_handler_thread.h"
 #include "../../utils/includes.h"
 #include "../manager.h"
-#include "../models/comunicacao.h"
+#include "../../utils/models/comunicacao.h"
 #include "../service/msg_service.h"
 #include "../service/topic_service.h"
 #include "../service/user_service.h"
@@ -42,16 +42,12 @@ void *feedHandlerThread(void *ptdata) {
             break;
             case SUBSCRIBE:
                 {
-                    RequestSubscribeUnsubscribeManager request;
-                    read(manager_fd, &request, sizeof(RequestSubscribeUnsubscribeManager));
-                    // subscribeTopics();
+                    subscribeTopic(manager_fd, td);
                 }
             break;
             case UNSUBSCRIBE:
                 {
-                    RequestSubscribeUnsubscribeManager request;
-                    read(manager_fd, &request, sizeof(RequestSubscribeUnsubscribeManager));
-                    // unsubscribeTopics();
+                    unsubscribeTopic(manager_fd, td);
                 }
             break;
             default:

@@ -1,6 +1,6 @@
 #include "feed_view.h"
 #include "../../utils/includes.h"
-#include "../../backend/models/comunicacao.h"
+#include "../../utils/models/comunicacao.h"
 #include "../feed.h"
 #include "../controllers/manager_handler_thread.h"
 #include "../../utils/globals.h"
@@ -106,6 +106,7 @@ void processCommand (const char *buffer, TFEED td){
                 strcpy(requestSubscribe.topicName, topic);
                 strcpy(requestSubscribe.base.userName, td.UserName);
                 strcpy(requestSubscribe.base.FEED_PIPE, td.FEED_PIPE);
+                write(td.manager_fd, &requestSubscribe.type, sizeof(RequestType));
                 write(td.manager_fd, &requestSubscribe, sizeof(RequestSubscribeUnsubscribeManager));
 
                 return ;
@@ -127,6 +128,7 @@ void processCommand (const char *buffer, TFEED td){
                 strcpy(requestUnsubscribe.topicName, topic);
                 strcpy(requestUnsubscribe.base.userName, td.UserName);
                 strcpy(requestUnsubscribe.base.FEED_PIPE, td.FEED_PIPE);
+                write(td.manager_fd, &requestUnsubscribe.type, sizeof(RequestType));
                 write(td.manager_fd, &requestUnsubscribe, sizeof(RequestSubscribeUnsubscribeManager));
 
                 return ;
@@ -155,7 +157,7 @@ void feedView(const char *nome) {
     RequestAuthManager requestAuthManager;
     TFEED td;
 
-    //system("clear");
+    system("clear");
     sleep(1);
 
     if (access(MANAGER_PIPE, F_OK) != 0) {

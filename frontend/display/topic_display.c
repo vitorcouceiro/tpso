@@ -1,6 +1,6 @@
 #include "topic_display.h"
 #include "../../utils/includes.h"
-#include "../../backend/models/comunicacao.h"
+#include "../../utils/models/comunicacao.h"
 
 void displayTopics(ResponseListTopics responseListTopics) {
     if (responseListTopics.n_topics == 0) {

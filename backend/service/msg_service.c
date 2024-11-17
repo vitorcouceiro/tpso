@@ -5,7 +5,6 @@
 #include "../../utils/globals.h"
 #include "../manager.h"
 
-
 void readtxt(char *filename, TDATA *td) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {

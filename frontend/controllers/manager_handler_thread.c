@@ -10,7 +10,6 @@ void *managerHandlerThread(void *ptdata) {
 
     int feed_fd = open(td->FEED_PIPE, O_RDWR);
     if (feed_fd == -1) {
-
         perror(ERROR_OPENING_FEED_PIPE);
         unlink(td->FEED_PIPE);
         exit(EXIT_FAILURE);

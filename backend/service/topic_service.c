@@ -128,8 +128,6 @@ void subscribeTopic(int manager_fd, TDATA *td) {
             }
             responseSubscribeTopic.n_persistentes = td->topic[index].n_persistentes;
             responseSubscribeTopic.type = TOPIC_SUBSCRIBE;
-            printf("%s\n", responseSubscribeTopic.persist[0].msg);
-            printf("%s\n", responseSubscribeTopic.persist[1].msg);
             unicastSubscribe(responseSubscribeTopic);
         }
     }
@@ -173,12 +171,15 @@ void unsubscribeTopic(int manager_fd, TDATA *td) {
                     break;
                 }
             }
+
+            //tirar isto e colocar na verificacao de tempo
             if (td->topic[index].n_subscribers == 0) {
                 for (int m = index; m < td->n_topics - 1; m++) {
                     td->topic[m] = td->topic[m + 1];
                 }
                 td->n_topics--;
             }
+
             strcpy(responseInfoError.buffer, UNSUBSCRIPTION_SUCCESS);
         } else {
             strcpy(responseInfoError.buffer, USER_NOT_SUBSCRIBED);

@@ -8,6 +8,13 @@ void removePersistentMsg(TDATA *td, int topicIndex, int msgIndex) {
         td->topic[topicIndex].persistente[i] = td->topic[topicIndex].persistente[i + 1];
     }
     td->topic[topicIndex].n_persistentes--;
+
+    if (td->topic[topicIndex].n_persistentes == 0 && td->topic[topicIndex].n_subscribers == 0) {
+        for (int j = topicIndex; j < td->n_topics - 1; j++) {
+            td->topic[j] = td->topic[j + 1];
+        }
+        td->n_topics--;
+    }
 }
 
 

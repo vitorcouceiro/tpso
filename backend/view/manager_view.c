@@ -199,4 +199,8 @@ void managerView(){
 
     } while (1);
 
+    //nao devias fechar a thread com pthread_join()?
+
+    saveMessages(filename, &td);
+
 }

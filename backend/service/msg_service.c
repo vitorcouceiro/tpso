@@ -4,6 +4,7 @@
 #include "../communication/broadcast_communication.h"
 #include "../../utils/globals.h"
 #include "../manager.h"
+#include <stdio.h>
 
 void readtxt(char *filename, TDATA *td) {
     FILE *file = fopen(filename, "r");
@@ -166,4 +167,25 @@ void createMsg(int manager_fd, TDATA *td) {
         }
     }
 
+}
+
+void saveMessages(char filename[], TDATA *td){
+    FILE *file = fopen(filename, "w");
+    if(file == NULL){
+        //nao sei como é que queres terminar o programa aqui
+    }
+
+    //se o n_topics for o numero de topicos que esta a ser usado no momento isto esta certo
+    //se nao trocar por 20
+    //also esta a assumir que os topicos que estao a ser usados estao todos juntos
+
+    //por cada um dos topicos
+    for (int i = 0; i< td->n_topics; ++i) {
+        //por cada uma das mensagens persistentes dentro dos topicos
+        for (int j = 0 ; j < td->topic[i].n_persistentes; ++j) {
+            fprintf(file, "%s %s %d %s\n",td->topic[i].nome, td->topic[i].persistente[j].autor, td->topic[i].persistente[j].duration, td->topic[i].persistente[j].msg);
+        }
+    }
+
+    fclose(file);
 }

@@ -1,8 +1,9 @@
 #ifndef MANAGER_H
 #define MANAGER_H
+
 #include "../utils/models/topic.h"
 #include "../utils/models/user.h"
-//#include <pthread.h>
+#include <pthread.h>
 
 //extern pthread_mutex_t td_mutex;
 
@@ -13,6 +14,7 @@ typedef struct
     int manager_fd;
     Topic topic[20];
     User user[10];
+    pthread_mutex_t mutex;
 } TDATA;
 
 void cleanup(int signo);

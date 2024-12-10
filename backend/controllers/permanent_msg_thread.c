@@ -1,6 +1,7 @@
 #include "permanent_msg_thread.h"
 #include "../../utils/includes.h"
 #include "../manager.h"
+#include <pthread.h>
 
 void removePersistentMsg(TDATA *td, int topicIndex, int msgIndex) {
     for (int i = msgIndex; i < td->topic[topicIndex].n_persistentes - 1; i++) {
@@ -18,6 +19,8 @@ void *permanentMsgHandlerThread(void *ptdata) {
     while (1) {
         sleep(CHECK_INTERVAL);
 
+        //meto aqui um mutex para que ele so elimine e mude o valor de mensagens se nao estiverem a ler ou a escrever mensagens
+        pthread_mutex_lock(&td->mutex);
         for (int i = 0; i < td->n_topics; i++) {
             int j = 0;
             while (j < td->topic[i].n_persistentes) {
@@ -29,8 +32,7 @@ void *permanentMsgHandlerThread(void *ptdata) {
                 }
             }
         }
+
+        pthread_mutex_unlock(&td->mutex);
     }
 }
-
-
-

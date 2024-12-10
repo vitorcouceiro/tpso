@@ -66,7 +66,10 @@ void processCommandAdm(char *buffer, TDATA *td){
             break;
         case 2:
             if(n_topics == 1){
+                //ponho aqui um mutex porque como ele manda o numero de mensagens persistentes no topico entao convem que ele nao mude esse valor enquanto ele esta a ler
+                pthread_mutex_lock(&td->mutex);
                 displayTopics(td);
+                pthread_mutex_unlock(&td->mutex);
             }else{
                 printf(SYNTAX_ERROR_TOPICS);
                 return;
@@ -75,7 +78,10 @@ void processCommandAdm(char *buffer, TDATA *td){
         case 3:
             if(n_topics == 2){
                 char *topic = strtok(NULL, SPACE);
+                //como vai dar display a uma mensagem convem que ele nao tente dar display a uma mensagem que entretanto esta a ser apagada
+                pthread_mutex_lock(&td->mutex);
                 displayPerMsg(td,topic);
+                pthread_mutex_unlock(&td->mutex);
             }else{
                 printf(SYNTAX_ERROR_SHOW);
                 return;
@@ -103,6 +109,8 @@ void processCommandAdm(char *buffer, TDATA *td){
             if(n_topics == 1){
                 printf(EXITING);
                 unlink(MANAGER_PIPE);
+                char *filename = getenv("MSG_FICH");
+                saveMessages(filename, td);
                 exit(EXIT_SUCCESS);
             }else{
                 printf(SYNTAX_ERROR_CLOSE);
@@ -126,11 +134,8 @@ void managerView(){
     pthread_t threadfeed,threadpermanentmsgs;
     char buffer[MAX_MSG_SIZE];
 
-    TDATA td;
-    td.n_topics = 0;
-    td.n_users = 0;
-    td.topic->n_persistentes = 0;
-    td.topic->n_subscribers = 0;
+    TDATA td ={0};
+    pthread_mutex_init(&td.mutex, NULL);
 
     system("clear");
 
@@ -201,6 +206,6 @@ void managerView(){
 
     //nao devias fechar a thread com pthread_join()?
 
-    saveMessages(filename, &td);
+
 
 }

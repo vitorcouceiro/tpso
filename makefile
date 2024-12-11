@@ -1,6 +1,6 @@
-all: manager feed
+all: broker feed
 
-manager: backend/manager.o backend/communication/broadcast_communication.o backend/communication/unicast_communication.o backend/controllers/feed_handler_thread.o backend/display/list_users_display.o backend/display/per_msg_display.o backend/display/topic_display.o backend/service/msg_service.o backend/service/user_service.o backend/service/topic_service.o backend/view/manager_view.o utils/globals.o backend/controllers/permanent_msg_thread.o
+broker: backend/manager.o backend/communication/broadcast_communication.o backend/communication/unicast_communication.o backend/controllers/feed_handler_thread.o backend/display/list_users_display.o backend/display/per_msg_display.o backend/display/topic_display.o backend/service/msg_service.o backend/service/user_service.o backend/service/topic_service.o backend/view/manager_view.o utils/globals.o backend/controllers/permanent_msg_thread.o
 	gcc -o backend/manager backend/manager.o backend/communication/broadcast_communication.o backend/communication/unicast_communication.o backend/controllers/feed_handler_thread.o backend/display/list_users_display.o backend/display/per_msg_display.o backend/display/topic_display.o backend/service/msg_service.o backend/service/user_service.o backend/service/topic_service.o backend/view/manager_view.o utils/globals.o backend/controllers/permanent_msg_thread.o
 
 feed: frontend/feed.o frontend/view/feed_view.o frontend/controllers/manager_handler_thread.o frontend/controllers/monitor_server_thread.o frontend/display/topic_display.o utils/globals.o
@@ -61,4 +61,4 @@ backend/view/manager_view.o: backend/view/manager_view.c backend/view/manager_vi
 	gcc -c backend/view/manager_view.c -o backend/view/manager_view.o
 
 clean:
-	rm -f frontend/*.o backend/*.o utils/*.o frontend/feed backend/manager
+	rm -f frontend/controllers/*.o frontend/display/*.o frontend/view/*.o backend/communication/*.o backend/controllers/*.o backend/display/*.o backend/service/*.o backend/view/*.o utils/*.o frontend/feed backend/manager

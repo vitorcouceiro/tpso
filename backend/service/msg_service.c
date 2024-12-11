@@ -84,7 +84,6 @@ void createMsg(int manager_fd, TDATA *td) {
         }
 
         if(request.duration == 0) {
-            //nao sei ate que ponto faz sentido esta a escrever uma mensagem nao permanente que nao existe ou seja nao esta subscrito por ninguem
             /*
             responseMsg.type = MSG_NOTIFICATION;
             responseMsg.duration = request.duration;

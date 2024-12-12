@@ -61,4 +61,4 @@ backend/view/manager_view.o: backend/view/manager_view.c backend/view/manager_vi
 	gcc -c backend/view/manager_view.c -o backend/view/manager_view.o
 
 clean:
-	rm -f frontend/controllers/*.o frontend/display/*.o frontend/view/*.o backend/communication/*.o backend/controllers/*.o backend/display/*.o backend/service/*.o backend/view/*.o utils/*.o frontend/feed backend/manager
+	rm -f frontend/*.o frontend/controllers/*.o frontend/display/*.o frontend/view/*.o backend/*.o backend/communication/*.o backend/controllers/*.o backend/display/*.o backend/service/*.o backend/view/*.o utils/*.o frontend/feed backend/manager
